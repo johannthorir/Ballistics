@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Standard Model</title>
+	<script type="text/javascript" src="ballistics.js"></script>
+	<style>
+	     header { font-family : arial, sans-serif; font-size : 24pt; font-weight: bold; }
+		#console { font-family : arial, sans-serif; font-size : 10pt;}
+		.zero      { color : blue; }
+		.unethical { color : red; }
+		.nonlethal { color : orange; }
+		.range  { float : left; width : 6ex; text-align : right; margin-right : 2ex; }
+		.speed  { float : left; width : 6ex; text-align : right; margin-right : 2ex; }
+		.energy { float : left; width : 6ex; text-align : right; margin-right : 2ex; }
+		.path    { float : left; width : 6ex; text-align : right; margin-right : 2ex; }
+		.windage { float : left; width : 6ex; text-align : right; margin-right : 2ex; }
+		.time    { float : left; width : 6ex; text-align : right; margin-right : 2ex; }
+	</style>
+<script>
+function main()
+{
+    var s = 0;
+    var k = 0;
+
+    var bc        =  0.363; // The ballistic coefficient for the projectile.
+    var v         =  2950; // Initial velocity, in ft/s
+    var sh        =  1.72; // The Sight height over bore, in inches.
+    var angle     =    0.0; // The shooting angle (uphill / downhill), in degrees.
+    var zero_m    = 200;
+    var zero      =  zero_m/0.9144; // The zero range of the rifle, in yards.
+    var windspeed =  5.0 / 0.44704; // The wind speed in miles per hour.
+    var windangle =  90; // The wind angle (0=headwind, 90=right to left, 180=tailwind, 270/-90=left to right)
+    var weight    = 100; // grain
+
+    // bc = AtmCorrect(bc, 0, 29.59, 100,.7);
+    var output = ""
+
+	// this is only valid for up to 600 m or so, but should only be used as an initial guess.
+    var zeroangle = RadtoDeg(Math.atan((-DropAtZero(G1, bc, v, sh, zero))/(zero*36))); // ZeroAngle2(G1, bc, v, sh, zero, 0);
+    var result = SolveAll(G1, bc, weight, v, sh, angle, zeroangle, windspeed, windangle);
+	var sln = result.solutions;
+
+    output += "ZeroAngle is " +(zeroangle * 60).toFixed(2) + " MOA<br/>";
+    output += "High point is at " + result.maxpathrange.toFixed(1) + " m with sightline offset of " + (result.maxpath*2.54).toFixed(1) + " cm \n";
+    for (s=0;s<=300;s+=25)
+    {
+    	if(zero_m == s)
+    		output += '<div class="zero">'
+    	else if(sln[s].energy < 850)
+    		output += '<div class="nonlethal">';
+    	else if(sln[s].energy < 1200)
+    	    output += '<div class="unethical">';
+    	else
+    		output += '<div>';
+
+		output +=
+		'<div class="range">'  + (sln[s].range * 0.9144).toFixed(0) + "</div>" +
+		'<div class="speed">'  + (sln[s].velocity).toFixed(0) + "</div>"  +
+		'<div class="energy">' + (sln[s].energy).toFixed(0) + "</div>" +
+		'<div class="path">' + (sln[s].path * 2.54).toFixed(1)+ "</div>" +
+		'<div class="windage">' + (sln[s].windage*2.54).toFixed(1)+ "</div>" +
+		'<div class="time">' + (sln[s].time).toFixed(3) + "</div>" +
+		'</div><br />';
+   }
+
+   document.getElementById("console").innerHTML = output;
+   return result;
+}
+</script>
+</head>
+
+<body>
+<header>Standard Model</header>
+<nav></nav>
+
+<div id="console" style="width:50ex; float: left;"></div>
+<canvas id="myDrawing" width="400" height="301" style="border:1px solid #ccc;">
+<p>Your browser doesn't support canvas.</p>
+</canvas>
+<script>
+
+  var drawingCanvas = document.getElementById('myDrawing');
+  var border = 0;
+
+  function mapX(x) { return x/300.0  * (drawingCanvas.width - border*2) + border;  }
+
+  function mapY(y) {  return drawingCanvas.height - (y/1000.0 * (drawingCanvas.height - border*2) + border + drawingCanvas.height/2);  }
+
+
+  // Check the element is in the DOM and the browser supports canvas
+
+  if(drawingCanvas.getContext)
+  {
+ 	  // Initaliase a 2-dimensional drawing context
+    var context = drawingCanvas.getContext('2d');
+    results = main();
+    sln = results.solutions;
+
+
+
+
+	context.strokeStyle = "#000000";
+	context.lineWidth = 0.5;
+	context.fillStyle = "none";
+	context.moveTo(mapX(0), mapY(sln[0].path*25.4));
+
+    for(s=1; s<=300; s++)
+    {
+       context.lineTo(mapX(s), mapY(sln[s].path*25.4));
+    }
+
+	context.moveTo(mapX(0), mapY(0));
+	context.lineTo(mapX(300), mapY(0));
+
+	context.stroke();
+
+
+
+
+  }
+</script>
+</body>
+</html>
