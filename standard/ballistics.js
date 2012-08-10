@@ -171,6 +171,10 @@ function retard(DragFunction, DragCoefficient, Velocity)
 // the guy probably got this from a book somewhere..l
 function AtmCorrect(DragCoefficient, Altitude, Barometer, Temperature, RelativeHumidity)
 {
+
+   //this is how Pejsa does it (air pressure in millibars)   
+   // adjustment factor to retardation coefficient = (460.0 + temperature_f)/(519.0 - altitude / 280) * exp(altitude / 31654) * (2 - air_pressure/1000);
+
     var Tstd = -0.0036 * Altitude + 59;
     var FT = (Temperature - Tstd)/(459.6 + Tstd);
     var FR = 0.995*(Barometer/(Barometer - 0.3783*RelativeHumidity * ((4e-6 * Temperature - 0.0004) * Temperature  + 0.0234) * Temperature - 0.2517));
@@ -284,14 +288,14 @@ function ZeroAngle(DragFunction, DragCoefficient, Vi, SightHeight, ZeroRange, yI
     return RadtoDeg(angle); // Convert to degrees for return value.
 }
 
+*/
 
-// slightly better, but could use some improvement, f.ex using rifleman's rule to find an initial guess 
-function ZeroAngle2(DragFunction, DragCoefficient, Vi, SightHeight, ZeroRange, yIntercept)
+function ZeroAngle(DragFunction, DragCoefficient, Vi, SightHeight, ZeroRange, yIntercept)
 {
     var iterations = 0;
     // Numerical Integration variables
     var t = 0;
-    var dt = 0.5/Vi;
+    var dt = 0.25/Vi;
     var y = 0;
     var x = 0;
 
@@ -306,12 +310,13 @@ function ZeroAngle2(DragFunction, DragCoefficient, Vi, SightHeight, ZeroRange, y
     var Gx  = 0;
     var Gy  = 0;
 
-    var angle = DegtoRad(7);
-    var minchange = MOAtoRad(0.01);
+    var angle = DegtoRad(16); // Math.atan((-DropAtZero(DragFunction, DragCoefficient, Vi, SightHeight, ZeroRange))/(ZeroRange*36)); 
+    // var minchange = MOAtoRad(0.01);
 
     var da = angle/2;
     var found = false;
     var impact = (SightHeight + yIntercept)/12;
+    var mindiff = 0.1 / (25.4*12); 
 
     // ok we do this differently... start with big angle and then use binary search.
     // we start with bore at zero and try to find an impact at sightheight + yintercept at the given range.
@@ -334,7 +339,7 @@ function ZeroAngle2(DragFunction, DragCoefficient, Vi, SightHeight, ZeroRange, y
             vy1 = vy;
             vx1 = vx;
             v = Math.pow((Math.pow(vx,2)+Math.pow(vy,2)),0.5);
-            dt = 0.5/v;
+            dt = 0.25/v;
 
             dv = retard(DragFunction, DragCoefficient, v);
             dvy = -dv * vy/v;
@@ -356,7 +361,7 @@ function ZeroAngle2(DragFunction, DragCoefficient, Vi, SightHeight, ZeroRange, y
         else
             angle += da;
 
-        da /= 2;
+        da *= .5;
 
         // and we stop if the next angle change is less then one cent of moa.
 
@@ -364,15 +369,19 @@ function ZeroAngle2(DragFunction, DragCoefficient, Vi, SightHeight, ZeroRange, y
 
 
         // If our accuracy is sufficient, we can stop approximating.
-        if (da < minchange)
+        
+        if(Math.abs(y-impact) < mindiff)
             found = true;
+            
+      /*  if (da < minchange)
+            found = true; */
 
     }
 
-    // document.write(" Iterations: " + iterations + "\n");
+   // alert(" Iterations: " + iterations + "\n");
     return RadtoDeg(angle); // Convert to degrees for return value.
 }
-*/
+
 
 function SolveAll(DragFunction, DragCoefficient, Weight, Vi, SightHeight, ShootingAngle, ZAngle, WindSpeed, WindAngle )
 {

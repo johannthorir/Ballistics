@@ -9,10 +9,10 @@
 		.zero      { color : blue; }
 		.unethical { color : red; }
 		.nonlethal { color : orange; }
-		.range  { float : left; width : 6ex; text-align : right; margin-right : 2ex; }
-		.speed  { float : left; width : 6ex; text-align : right; margin-right : 2ex; }
-		.energy { float : left; width : 6ex; text-align : right; margin-right : 2ex; }
-		.path    { float : left; width : 6ex; text-align : right; margin-right : 2ex; }
+		.range  { float : left; width : 8ex; text-align : right; margin-right : 2ex; }
+		.speed  { float : left; width : 8ex; text-align : right; margin-right : 2ex; }
+		.energy { float : left; width : 8ex; text-align : right; margin-right : 2ex; }
+		.path    { float : left; width : 8ex; text-align : right; margin-right : 2ex; }
 		.windage { float : left; width : 6ex; text-align : right; margin-right : 2ex; }
 		.time    { float : left; width : 6ex; text-align : right; margin-right : 2ex; }
 	</style>
@@ -28,7 +28,7 @@ function main()
     var angle     =    0.0; // The shooting angle (uphill / downhill), in degrees.
     var zero_m    = 200;
     var zero      =  zero_m/0.9144; // The zero range of the rifle, in yards.
-    var windspeed =  5.0 / 0.44704; // The wind speed in miles per hour.
+    var windspeed =  0.0 / 0.44704; // The wind speed in miles per hour.
     var windangle =  90; // The wind angle (0=headwind, 90=right to left, 180=tailwind, 270/-90=left to right)
     var weight    = 100; // grain
 
@@ -36,14 +36,17 @@ function main()
     var output = ""
 
 	// this is only valid for up to 600 m or so, but should only be used as an initial guess.
-    var zeroangle = RadtoDeg(Math.atan((-DropAtZero(G1, bc, v, sh, zero))/(zero*36))); // ZeroAngle2(G1, bc, v, sh, zero, 0);
+    var zeroangle = ZeroAngle(G1, bc, v, sh, zero, 0);
     var result = SolveAll(G1, bc, weight, v, sh, angle, zeroangle, windspeed, windangle);
 	var sln = result.solutions;
 
     output += "ZeroAngle is " +(zeroangle * 60).toFixed(2) + " MOA<br/>";
     output += "High point is at " + result.maxpathrange.toFixed(1) + " m with sightline offset of " + (result.maxpath*2.54).toFixed(1) + " cm \n";
-    for (s=0;s<=300;s+=25)
+    for (s=0;s<=600;s+=25)
     {
+    	if(sln[s] == undefined)
+    		break;
+
     	if(zero_m == s)
     		output += '<div class="zero">'
     	else if(sln[s].energy < 850)
@@ -73,7 +76,7 @@ function main()
 <header>Standard Model</header>
 <nav></nav>
 
-<div id="console" style="width:50ex; float: left;"></div>
+<div id="console" style="width:60ex; float: left;"></div>
 <canvas id="myDrawing" width="400" height="301" style="border:1px solid #ccc;">
 <p>Your browser doesn't support canvas.</p>
 </canvas>
