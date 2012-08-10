@@ -5,16 +5,19 @@
 	<script type="text/javascript" src="ballistics.js"></script>
 	<style>
 	     header { font-family : arial, sans-serif; font-size : 24pt; font-weight: bold; }
-		#console { font-family : arial, sans-serif; font-size : 10pt;}
+		table,#console { font-family : arial, sans-serif; font-size : 10pt;}
 		.zero      { color : blue; }
-		.unethical { color : red; }
-		.nonlethal { color : orange; }
+		.unethical { color : orange; }
+		.nonlethal { color : red; }
 		.range  { float : left; width : 8ex; text-align : right; margin-right : 2ex; }
 		.speed  { float : left; width : 8ex; text-align : right; margin-right : 2ex; }
 		.energy { float : left; width : 8ex; text-align : right; margin-right : 2ex; }
 		.path    { float : left; width : 8ex; text-align : right; margin-right : 2ex; }
 		.windage { float : left; width : 6ex; text-align : right; margin-right : 2ex; }
 		.time    { float : left; width : 6ex; text-align : right; margin-right : 2ex; }
+
+td.number { padding-right : 1ex;  padding-left : 0px; text-align : right;}
+.number input { text-align : right; width : 5em;}
 	</style>
 <script>
 function main()
@@ -22,15 +25,19 @@ function main()
     var s = 0;
     var k = 0;
 
-    var bc        =  0.363; // The ballistic coefficient for the projectile.
-    var v         =  2950; // Initial velocity, in ft/s
-    var sh        =  1.72; // The Sight height over bore, in inches.
+    var bc        =  parseFloat(document.getElementById('bc').value); // The ballistic coefficient for the projectile.
+    var v         =  parseFloat(document.getElementById('mv').value); // Initial velocity, in ft/s
+    var sh        =  parseFloat(document.getElementById('sh').value) / 25.4; // The Sight height over bore, in inches.
     var angle     =    0.0; // The shooting angle (uphill / downhill), in degrees.
-    var zero_m    = 200;
+    var zero_m    =  parseFloat(document.getElementById('zr').value);
     var zero      =  zero_m/0.9144; // The zero range of the rifle, in yards.
-    var windspeed =  0.0 / 0.44704; // The wind speed in miles per hour.
+    var windspeed =  1.0 / 0.44704; // The wind speed in miles per hour.
     var windangle =  90; // The wind angle (0=headwind, 90=right to left, 180=tailwind, 270/-90=left to right)
-    var weight    = 100; // grain
+    var weight    =  parseFloat(document.getElementById('bw').value); // grain
+    var maxrange  =  parseFloat(document.getElementById('mr').value);
+
+	if(bc == 0)
+		return;
 
     // bc = AtmCorrect(bc, 0, 29.59, 100,.7);
     var output = ""
@@ -39,10 +46,10 @@ function main()
     var zeroangle = ZeroAngle(G1, bc, v, sh, zero, 0);
     var result = SolveAll(G1, bc, weight, v, sh, angle, zeroangle, windspeed, windangle);
 	var sln = result.solutions;
-
+	result.maxrange= maxrange;
     output += "ZeroAngle is " +(zeroangle * 60).toFixed(2) + " MOA<br/>";
     output += "High point is at " + result.maxpathrange.toFixed(1) + " m with sightline offset of " + (result.maxpath*2.54).toFixed(1) + " cm \n";
-    for (s=0;s<=600;s+=25)
+    for (s=0;s<=maxrange;s+=25)
     {
     	if(sln[s] == undefined)
     		break;
@@ -69,23 +76,15 @@ function main()
    document.getElementById("console").innerHTML = output;
    return result;
 }
-</script>
-</head>
 
-<body>
-<header>Standard Model</header>
-<nav></nav>
-
-<div id="console" style="width:60ex; float: left;"></div>
-<canvas id="myDrawing" width="400" height="301" style="border:1px solid #ccc;">
-<p>Your browser doesn't support canvas.</p>
-</canvas>
-<script>
-
+function redraw()
+{
+  var results = main();
   var drawingCanvas = document.getElementById('myDrawing');
+  drawingCanvas.width = drawingCanvas.width;
   var border = 0;
 
-  function mapX(x) { return x/300.0  * (drawingCanvas.width - border*2) + border;  }
+  function mapX(x) { return x/results.maxrange  * (drawingCanvas.width - border*2) + border;  }
 
   function mapY(y) {  return drawingCanvas.height - (y/1000.0 * (drawingCanvas.height - border*2) + border + drawingCanvas.height/2);  }
 
@@ -96,31 +95,110 @@ function main()
   {
  	  // Initaliase a 2-dimensional drawing context
     var context = drawingCanvas.getContext('2d');
-    results = main();
+	context.fillStyle = "#ffffff";
+    context.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+
+
     sln = results.solutions;
+	context.beginPath();
+	context.strokeStyle="#00000";
+	context.lineWidth = 0.125;
+
+	for(s=0; s<=results.maxrange; s+=25)
+	{
+		var x = mapX(s);
+		context.moveTo(x,0);
+		context.lineTo(x,drawingCanvas.height);
+	}
 
 
+	for(s=1; s<=500; s+=50)
+	{
+		var y1 = mapY(s);
+		var y2 = mapY(-s);
+		context.moveTo(0,y1);
+		context.lineTo(drawingCanvas.width, y1);
+		context.moveTo(0,y2);
+		context.lineTo(drawingCanvas.width, y2);
+	}
 
+	context.stroke();
 
+	context.beginPath();
 	context.strokeStyle = "#000000";
 	context.lineWidth = 0.5;
-	context.fillStyle = "none";
 	context.moveTo(mapX(0), mapY(sln[0].path*25.4));
 
-    for(s=1; s<=300; s++)
+    for(s=1; s<=results.maxrange; s++)
     {
        context.lineTo(mapX(s), mapY(sln[s].path*25.4));
     }
 
-	context.moveTo(mapX(0), mapY(0));
-	context.lineTo(mapX(300), mapY(0));
 
+
+	context.moveTo(mapX(0), mapY(0));
+	context.lineTo(mapX(results.maxrange), mapY(0));
 	context.stroke();
 
+	context.beginPath();
+	context.strokeStyle = "#eecc00";
 
-
+	context.moveTo(mapX(0), mapY(results.maxpath * 25.4));
+	context.lineTo(mapX(results.maxrange), mapY(results.maxpath * 25.4));
+	context.moveTo(mapX(results.maxpathrange), mapY(-500));
+	context.lineTo(mapX(results.maxpathrange), mapY(500));
+	context.stroke();
 
   }
+}
+
+function spin(event, step)
+{
+	if(event != undefined)
+	{
+       var keyCode = event.which;
+
+      if (keyCode == undefined)
+            keyCode = event.keyCode;
+
+       // alert(keyCode + "  " + event.target.value);
+       if(keyCode == 38)
+       {
+       	   event.target.value = parseFloat(event.target.value) + step;
+       	   // redraw();
+       }
+       else if(keyCode == 40)
+       {
+       	   event.target.value = Math.max(parseFloat(event.target.value) - step, 0);
+       	  // redraw();
+       }
+   }
+}
+
+</script>
+
+
+
+</head>
+
+<body>
+<header>Standard Model</header>
+<nav></nav>
+<table cellspacing="0">
+<tr><td>BC:</td><td class="number" ><input onkeyup="redraw();"                            type="text" value="0.261" id="bc"    /></td></tr>
+<tr><td>Hraði við hlaupenda </td><td class="number" ><input onkeyup="redraw();" onkeydown="spin(event,10)" type="text" value="2850"  id="mv"  /></td><td>fps</td></tr>
+<tr><td>Þyngd</td><td class="number" ><input onkeyup="redraw();" onkeydown="spin(event,5)"  type="text" value="100"   id="bw"  /></td><td>gr</td></tr>
+<tr><td>Núllfjarlægð</td><td class="number" ><input onkeyup="redraw();" onkeydown="spin(event,5)" type="text" value="100"   id="zr"  /></td><td>m</td></tr>
+<tr><td>Kíkismiðja frá hlaupmiðju</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 1)" type="text" value="44" id="sh"></td><td>mm</td></tr>
+<tr><td>Reikna út í</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 50)" type="text" value="300" id="mr"></td><td>m</td></tr>
+</table>
+
+<div id="console" style="width:60ex; float: left;"></div>
+<canvas id="myDrawing" width="400" height="301" style="border:1px solid #ccc;">
+<p>Your browser doesn't support canvas.</p>
+</canvas>
+<script>
+redraw();
 </script>
 </body>
 </html>

@@ -310,22 +310,21 @@ function ZeroAngle(DragFunction, DragCoefficient, Vi, SightHeight, ZeroRange, yI
     var Gx  = 0;
     var Gy  = 0;
 
+    return RadtoDeg(Math.atan((-DropAtZero(DragFunction, DragCoefficient, Vi, SightHeight, ZeroRange))/(ZeroRange*36))); 
+    
     var angle = DegtoRad(16); // Math.atan((-DropAtZero(DragFunction, DragCoefficient, Vi, SightHeight, ZeroRange))/(ZeroRange*36)); 
     // var minchange = MOAtoRad(0.01);
 
     var da = angle/2;
     var found = false;
-    var impact = (SightHeight + yIntercept)/12;
-    var mindiff = 0.1 / (25.4*12); 
+    var impact = (yIntercept)/12;
+    var mindiff = 0.0001/12; 
+    var minchange = MOAtoRad(0.01);
 
-    // ok we do this differently... start with big angle and then use binary search.
-    // we start with bore at zero and try to find an impact at sightheight + yintercept at the given range.
     while(!found)
     {
-        // document.write("angle: " + RadtoDeg(angle) + "\n");
-
         x = 0;
-        y = 0;
+        y = -SightHeight/12;
 
         vy = Vi * Math.sin(angle);
         vx = Vi * Math.cos(angle);
@@ -363,7 +362,7 @@ function ZeroAngle(DragFunction, DragCoefficient, Vi, SightHeight, ZeroRange, yI
 
         da *= .5;
 
-        // and we stop if the next angle change is less then one cent of moa.
+        // and we stop if the next angle change is less than one cent of moa.
 
         // document.write("   x " + x + ", y = " + (y*12*25.4).toFixed(1) + "\n");
 
@@ -373,8 +372,8 @@ function ZeroAngle(DragFunction, DragCoefficient, Vi, SightHeight, ZeroRange, yI
         if(Math.abs(y-impact) < mindiff)
             found = true;
             
-      /*  if (da < minchange)
-            found = true; */
+        if (da < minchange)
+            found = true;
 
     }
 
