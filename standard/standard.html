@@ -35,6 +35,7 @@ function main()
     var windangle =  90; // The wind angle (0=headwind, 90=right to left, 180=tailwind, 270/-90=left to right)
     var weight    =  parseFloat(document.getElementById('bw').value); // grain
     var maxrange  =  parseFloat(document.getElementById('mr').value);
+   // var vitals    =  parseFloat(document.getElementById('vs').value) / 2.54; 
 
 	if(bc == 0)
 		return;
@@ -42,13 +43,19 @@ function main()
     // bc = AtmCorrect(bc, 0, 29.59, 100,.7);
     var output = ""
 
-	// this is only valid for up to 600 m or so, but should only be used as an initial guess.
     var zeroangle = ZeroAngle(G1, bc, v, sh, zero, 0);
     var result = SolveAll(G1, bc, weight, v, sh, angle, zeroangle, windspeed, windangle);
+    //DragFunction, DragCoefficient, Vi, SightHeight, VitalSize
+    // result.pbr_zero = PointBlankSolution(G1, bc, v, sh, vitals);
+
 	var sln = result.solutions;
+
 	result.maxrange= maxrange;
+
     output += "ZeroAngle is " +(zeroangle * 60).toFixed(2) + " MOA<br/>";
-    output += "High point is at " + result.maxpathrange.toFixed(1) + " m with sightline offset of " + (result.maxpath*2.54).toFixed(1) + " cm \n";
+    output += "High point is at " + result.maxpathrange.toFixed(1) + " m with sightline offset of " + (result.maxpath*2.54).toFixed(1) + " cm<br/>";
+    // output += "pbr zero : " + (result.pbr_zero/0.9144).toFixed(1) + " m <br/>";
+
     for (s=0;s<=maxrange;s+=25)
     {
     	if(sln[s] == undefined)
@@ -123,7 +130,18 @@ function redraw()
 	}
 
 	context.stroke();
-
+/*
+	context.beginPath();
+	context.strokeStyle = "#003399";
+	context.lineWidth = 0.5;
+	var fromX = mapX(results.pbr.min_range / 0.9144);
+	var toX = mapX(results.pbr.max_range / 0.9144);
+	var fromY = mapY(-results.pbr.vitals/2 * 25.4);
+	var toY   = mapY(results.pbr.vitals/2 * 25.4);
+	
+	context.rect(fromX, fromY, (toX - fromX), (toY - fromY));
+	context.stroke();
+	*/
 	context.beginPath();
 	context.strokeStyle = "#000000";
 	context.lineWidth = 0.5;
@@ -189,6 +207,7 @@ function spin(event, step)
 <tr><td>Hraði við hlaupenda </td><td class="number" ><input onkeyup="redraw();" onkeydown="spin(event,10)" type="text" value="2850"  id="mv"  /></td><td>fps</td></tr>
 <tr><td>Þyngd</td><td class="number" ><input onkeyup="redraw();" onkeydown="spin(event,5)"  type="text" value="100"   id="bw"  /></td><td>gr</td></tr>
 <tr><td>Núllfjarlægð</td><td class="number" ><input onkeyup="redraw();" onkeydown="spin(event,5)" type="text" value="100"   id="zr"  /></td><td>m</td></tr>
+<!--<tr><td>Þvermál ákomusvæðis</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 5)" type="text" value="14" id="vs"/></td><td>cm</td></tr> -->
 <tr><td>Kíkismiðja frá hlaupmiðju</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 1)" type="text" value="44" id="sh"></td><td>mm</td></tr>
 <tr><td>Reikna út í</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 50)" type="text" value="300" id="mr"></td><td>m</td></tr>
 </table>

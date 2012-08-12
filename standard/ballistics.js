@@ -167,13 +167,15 @@ function retard(DragFunction, DragCoefficient, Velocity)
 }
 
 
+//   the parameter is called DragCoefficient but it's called with the Ballistic Coefficient in his example.
+//   If he got this from a book where it applies to the drag coefficient, then is this correct for the BC?
 
-// the guy probably got this from a book somewhere..l
 function AtmCorrect(DragCoefficient, Altitude, Barometer, Temperature, RelativeHumidity)
 {
 
    //this is how Pejsa does it (air pressure in millibars)   
    // adjustment factor to retardation coefficient = (460.0 + temperature_f)/(519.0 - altitude / 280) * exp(altitude / 31654) * (2 - air_pressure/1000);
+   // pejsas retardation coefficient is BC * maeywski's constant * vi^0.45
 
     var Tstd = -0.0036 * Altitude + 59;
     var FT = (Temperature - Tstd)/(459.6 + Tstd);
@@ -186,109 +188,7 @@ function AtmCorrect(DragCoefficient, Altitude, Barometer, Temperature, RelativeH
 function Windage(WindSpeed, Vi, xx, t)   { return ((WindSpeed * 17.60) *(t - xx / Vi));        }
 function HeadWind(WindSpeed, WindAngle)  { return (Math.cos(DegtoRad(WindAngle)) * WindSpeed); }
 function CrossWind(WindSpeed, WindAngle) { return (Math.sin(DegtoRad(WindAngle)) * WindSpeed); }
-/*
 
-// Very stupid search for zero angle... guy did not do his algorithms 101.  
-
-function ZeroAngle(DragFunction, DragCoefficient, Vi, SightHeight, ZeroRange, yIntercept)
-{
-    var iterations = 0;
-    // Numerical Integration variables
-    var t = 0;
-    var dt = 1/Vi;
-    var y = -SightHeight/12;
-    var x = 0;
-
-    var v   = 0;
-    var vx  = 0;
-    var vy  = 0;
-    var vx1 = 0;
-    var vy1 = 0;
-    var dv  = 0;
-    var dvx = 0;
-    var dvy = 0;
-    var Gx  = 0;
-    var Gy  = 0;
-
-    var angle = 0;
-    var quit = 0;
-
-
-    var da = DegtoRad(14);
-
-
-    // The general idea here is to start at 0 degrees elevation, and increase the elevation by 14 degrees
-    // until we are above the correct elevation.  Then reduce the angular change by half, and begin reducing
-    // the angle.  Once we are again below the correct angle, reduce the angular change by half again, and go
-    // back up.  This allows for a fast successive approximation of the correct elevation, usually within less
-    // than 20 iterations.
-
-    for (angle=0; quit == 0; angle = angle + da)
-    {
-        document.write("angle: " + angle + "\n");
-
-        vy = Vi * Math.sin(angle);
-        vx = Vi * Math.cos(angle);
-        Gx = GRAVITY * Math.sin(angle);
-        Gy = GRAVITY * Math.cos(angle);
-        x = 0;
-        y = -SightHeight/12;
-
-        for (t=0; x <= (ZeroRange * 3); t = t+dt)
-        {
-            iterations++;
-            vy1 = vy;
-            vx1 = vx;
-            v = Math.pow((Math.pow(vx,2)+Math.pow(vy,2)),0.5);
-            dt = 1/v;
-
-            dv = retard(DragFunction, DragCoefficient, v);
-            dvy = -dv * vy/v;
-            dvx = -dv * vx/v;
-
-            vx = vx + dt * (dvx + Gx);
-            vy = vy + dt * (dvy + Gy);
-
-            x = x + dt * (vx + vx1)/2;
-            y = y + dt * (vy + vy1)/2;
-
-            if (vy < 0 && y < yIntercept)
-            {
-                break;
-            }
-
-            if (vy > 3*vx)
-            {
-                break;
-            }
-        }
-
-        document.write("   x " + x + ", y = " + y + "\n");
-
-        if (y>yIntercept && da>0)
-        {
-            da = -da / 2;
-        }
-
-        if (y<yIntercept && da<0)
-        {
-            da = -da / 2;
-        }
-
-        // If our accuracy is sufficient, we can stop approximating.
-        if (Math.abs(da) < MOAtoRad(0.01))
-            quit = 1;
-
-        if (angle > DegtoRad(45))
-            quit = 1;
-
-    }
-
-    document.write(" Iterations: " + iterations + "\n");
-    return RadtoDeg(angle); // Convert to degrees for return value.
-}
-
-*/
 
 function ZeroAngle(DragFunction, DragCoefficient, Vi, SightHeight, ZeroRange, yIntercept)
 {
@@ -310,7 +210,8 @@ function ZeroAngle(DragFunction, DragCoefficient, Vi, SightHeight, ZeroRange, yI
     var Gx  = 0;
     var Gy  = 0;
 
-    return RadtoDeg(Math.atan((-DropAtZero(DragFunction, DragCoefficient, Vi, SightHeight, ZeroRange))/(ZeroRange*36))); 
+	if(ZeroRange < 600) 
+    	return RadtoDeg(Math.atan((-DropAtZero(DragFunction, DragCoefficient, Vi, SightHeight, ZeroRange))/(ZeroRange*36))); 
     
     var angle = DegtoRad(16); // Math.atan((-DropAtZero(DragFunction, DragCoefficient, Vi, SightHeight, ZeroRange))/(ZeroRange*36)); 
     // var minchange = MOAtoRad(0.01);
@@ -349,6 +250,7 @@ function ZeroAngle(DragFunction, DragCoefficient, Vi, SightHeight, ZeroRange, yI
 
             x = x + dt * (vx + vx1)/2;
             y = y + dt * (vy + vy1)/2;
+            
             if(vy < 0 && y < impact)
                 break;
         }
@@ -504,156 +406,240 @@ function DropAtZero(DragFunction, DragCoefficient, Vi, SightHeight, ZeroRange)
 }
 
 
-/* 
+function PointBlankSolution(DragFunction, DragCoefficient, Vi, SightHeight, VitalSize)
+{
+	var solution = new Array();
+    var dt;
 
-// unbelievably stupid implementation.
+    var vx = Vi;
+    var vy = 0;
 
-int pbr(int DragFunction, double DragCoefficient, double Vi, double SightHeight, double VitalSize, int* oresult){
-
-    double t=0;
-    double dt=0.25/Vi;
-    double v=0;
-    double vx=0, vx1=0, vy=0, vy1=0;
-    double dv=0, dvx=0, dvy=0;
-    double x=0, y=0;
-    double ShootingAngle=0;
-    double ZAngle=0;
-    double Step=10;
-
-    int result=0;
-
-    int quit=0;
-
-    double zero=-1;
-    double farzero=0;
-
-    int vertex_keep=0;
-    double y_vertex=0;
-    double x_vertex=0;
-
-    double min_pbr_range=0;
-    int min_pbr_keep=0;
-
-    double max_pbr_range=0;
-    int max_pbr_keep=0;
-
-    int tin100=0;
-
-    double Gy=GRAVITY*cos(DegtoRad((ShootingAngle + ZAngle)));
-    double Gx=GRAVITY*sin(DegtoRad((ShootingAngle + ZAngle)));
-
-    while (quit==0)
+    var x = 0;
+    var y = -SightHeight/12; // feet.
+    
+    solution[0] = new Object();
+    solution[0].x = x;
+    solution[0].y = y;
+    solution[0].slope = vy/vx;
+    solution[0].high = 0;
+    
+    var last_high = 0; // index of the last high point.
+     
+    for(var t=0,n=1;;t += dt, n++)
     {
-        int keep=0;
-        int keep2=0;
-        int tinkeep=0;
-        int n=0;
+        var vx1 = vx;
+        var vy1 = vy;
 
-        Gy=GRAVITY*cos(DegtoRad((ShootingAngle + ZAngle)));
-        Gx=GRAVITY*sin(DegtoRad((ShootingAngle + ZAngle)));
+        var v = Math.pow( Math.pow(vx, 2) + Math.pow(vy, 2), 0.5);
+        dt = 0.1/v;
 
-        vx=Vi*cos(DegtoRad(ZAngle));
-        vy=Vi*sin(DegtoRad(ZAngle));
+        var dv = retard(DragFunction, DragCoefficient, v);
 
-        y=-SightHeight/12;
+        var dvx = -(vx/v)*dv;
+        var dvy = -(vy/v)*dv + GRAVITY;
 
-        x=0; y=-SightHeight/12;
+        vx += dt*dvx;
+        vy += dt*dvy;
+		
+        x += dt*(vx + vx1)/2;
+        y += dt*(vy + vy1)/2;
 
-        min_pbr_keep=0;
-        max_pbr_keep=0;
-        vertex_keep=0;
-
-        tin100=0;
-        tinkeep=0;
-
-
-        for (t=0;;t=t+dt){
-
-            vx1=vx, vy1=vy;
-            v=pow(pow(vx,2)+pow(vy,2),0.5);
-            dt=0.5/v;
-
-            // Compute acceleration using the drag function retardation
-            dv = retard(DragFunction,DragCoefficient,v);
-            dvx = -(vx/v)*dv;
-            dvy = -(vy/v)*dv;
-
-            // Compute velocity, including the resolved gravity vectors.
-            vx=vx + dt*dvx + dt*Gx;
-            vy=vy + dt*dvy + dt*Gy;
-
-            // Compute position based on average velocity.
-            x=x+dt*(vx+vx1)/2;
-            y=y+dt*(vy+vy1)/2;
-
-            if (y>0 && keep==0 && vy>=0) {
-                zero=x;
-                keep=1;
-            }
-
-            if (y<0 && keep2==0 && vy<=0){
-                farzero=x;
-                keep2=1;
-            }
-
-            if ((12*y)>-(VitalSize/2) && min_pbr_keep==0){
-                min_pbr_range=x;
-                min_pbr_keep=1;
-            }
-
-            if ((12*y)<-(VitalSize/2) && min_pbr_keep==1 && max_pbr_keep==0){
-                max_pbr_range=x;
-                max_pbr_keep=1;
-            }
-
-            if (x>=300 && tinkeep==0){
-                tin100=(int)((float)100*(float)y*(float)12);
-                tinkeep=1;
-            }
-
-
-            if (Math.abs(vy)>Math.abs(3*vx)) { result=PBR_ERROR; break; }
-            if (n>=__BCOMP_MAXRANGE__+1) { result=PBR_ERROR; break;}
-
-
-            // The PBR will be maximum at the point where the vertex is 1/2 vital zone size.
-            if (vy<0 && vertex_keep==0){
-                y_vertex=y;
-                x_vertex=x;
-                vertex_keep=1;
-            }
-
-
-            if (keep==1 && keep2==1 && min_pbr_keep==1 && max_pbr_keep==1 && vertex_keep==1 && tinkeep==1) {
-                break;
-            }
-
-
-
+        // we've calculated a new point and the velocity
+        
+        // the slope from zero to here is        
+        var a = y/x;
+        
+        // search from the last index for a point a velocity vector with the same slope.
+        while(last_high < n && solution[last_high].slope > a)
+       		last_high++;
+        
+        
+        solution[n] = new Object();
+        solution[n].x = x;
+        solution[n].y = y;
+        solution[n].slope = vy/vx;
+        solution[n].high = 0;
+        	
+        
+        if(last_high < n)
+        {
+        	// the high point is half the vital zone size away.
+        	
+        	//zonesize = 2 * (Math.abs(solution[last_high].y - a * solution[last_high].x) / Math.sqrt(a*a + 1))*12;
+    		zonesize = 2 * Math.abs(solution[last_high].y - a * solution[last_high].x)*12;
+    		if(zonesize >= VitalSize)
+    		{
+    			alert("found stuff:  " + (solution[last_high].x/3 / 0.9144).toFixed(1) + "\n" + 
+    			"slope there is " + (solution[last_high].slope) + "\n" + 
+    			"slope here is " + a + "\n" + 
+    			"zonesize is " + (zonesize * 25.4).toFixed(0) + "mm");
+    			return x/3;     	
+    		}
         }
-
-        if ((y_vertex*12)>(VitalSize/2)){
-            if (Step>0) Step= -Step/2; // Vertex too high.  Go downwards.
-        }
-
-        else if ((y_vertex*12)<=(VitalSize/2)){ // Vertex too low.  Go upwards.
-            if (Step<0) Step = -Step/2;
-        }
-
-        ZAngle+=Step;
-
-        if (Math.abs(Step)<(0.01/60)) quit=1;
     }
 
-
-    oresult[0]=(int)(zero/3); // Near Zero
-    oresult[1]=(int)(farzero/3); // Far zero
-    oresult[2]=(int)(min_pbr_range/3); // Minimum PBR
-    oresult[3]=(int)(max_pbr_range/3); // Maximum PBR
-    oresult[4]=(int)tin100; // Sight-in at 100 yds (in 100ths of an inch)
-
     return 0;
+
 }
 
 
-*/
+
+function pbr(DragFunction, DragCoefficient, Vi, SightHeight, VitalSize)
+{
+
+    var t=0;
+    var dt=0.25/Vi;
+    var v=0;
+    var vx=0, vx1=0, vy=0, vy1=0;
+    var dv=0, dvx=0, dvy=0;
+    var x=0, y=0;
+    var ZAngle=0;
+    var Step=10;
+
+    var quit = false;
+
+    var zero    = -1;
+    var farzero = 0;
+
+    var vertex_keep = false;
+    var y_vertex = 0;
+    var x_vertex = 0;
+
+    var min_pbr_range = 0;
+    var min_pbr_keep = false;
+
+    var max_pbr_range = 0;
+    var max_pbr_keep = false;
+
+    var tin100 = 0;
+
+    var Gy;
+    var Gx;
+
+    while (!quit)
+    {
+        var keep    = false;
+        var keep2   = false;
+        var tinkeep = false;
+        var n = 0;
+
+        Gy = GRAVITY * Math.cos(DegtoRad((ZAngle)));
+        Gx = GRAVITY * Math.sin(DegtoRad((ZAngle)));
+
+        vx = Vi * Math.cos(DegtoRad(ZAngle));
+        vy = Vi * Math.sin(DegtoRad(ZAngle));
+
+        x = 0;
+        y = -SightHeight/12;
+
+        min_pbr_keep = false;
+        max_pbr_keep = false;
+        vertex_keep = false;
+
+        tin100 = 0;
+        
+
+
+        for (t=0;;t=t+dt)
+        {
+            vx1 = vx;
+            vy1 = vy;
+            v = Math.sqrt(vx*vx + vy*vy);
+            dt = 0.25/v;
+
+            dv = retard(DragFunction, DragCoefficient, v);
+            dvx = -(vx/v) * dv;
+            dvy = -(vy/v) * dv;
+
+            // Compute velocity, including the resolved gravity vectors.
+            vx = vx + dt*(dvx + Gx);
+            vy = vy + dt*(dvy + Gy);
+
+            // Compute position based on average velocity.
+            x = x + dt*(vx + vx1)/2;
+            y = y + dt*(vy + vy1)/2;
+
+            if(y > 0 && !keep && vy >= 0) 
+            {
+                zero = x;
+                keep = true;
+            }
+
+
+            if(y<0 && !keep2 && vy <= 0)
+            {
+                farzero = x;
+                keep2 = true;
+            }
+
+            if( (12*y) > -(VitalSize/2) && !min_pbr_keep)
+            {
+                min_pbr_range = x;
+                min_pbr_keep = true;
+            }
+
+            if((12*y) < -(VitalSize/2) && min_pbr_keep && !max_pbr_keep)
+            {
+                max_pbr_range = x;
+                max_pbr_keep = true;
+            }
+
+            if ( x >= 300 && !tinkeep )
+            {
+                tin100 = (100*y*12);
+                tinkeep = true;
+            }
+
+
+            if (Math.abs(vy) > Math.abs(3*vx)) 
+            	break;
+           
+
+            // The PBR will be maximum at the point where the vertex is 1/2 vital zone size.
+            // this is recording the highest point....
+            
+            if (vy<0 && !vertex_keep) 
+            {
+                y_vertex = y;
+                x_vertex = x;
+                vertex_keep = true;
+            }
+
+
+            if (keep && keep2 && min_pbr_keep && max_pbr_keep && vertex_keep && tinkeep) 
+            {
+                break;
+            }
+        }
+
+        if( (y_vertex*12) > (VitalSize/2) )
+        {
+            if (Step > 0) 
+                Step= -Step/2; // Vertex too high.  Go downwards.
+        }
+        else if( (y_vertex*12)<=(VitalSize/2))
+        { 
+           // Vertex too low.  Go upwards.
+            if (Step < 0) 
+            	Step = -Step/2;
+        }
+
+        ZAngle += Step;
+
+        if( Math.abs(Step) <(0.01/60) ) 
+        	quit = true;
+    }
+
+	result = new Object()
+	result.near_zero = zero/3;
+	result.far_zero = farzero/3;
+	result.min_range = min_pbr_range/3;
+	result.max_range = max_pbr_range/3;
+	result.vitals    = VitalSize;
+	result.tin100 = tin100;
+	return result;
+	
+}
+
+
+
