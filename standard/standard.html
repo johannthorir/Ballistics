@@ -1,112 +1,371 @@
 <!DOCTYPE html>
 <html>
 <head>
+ <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
 	<title>Standard Model</title>
 	<script type="text/javascript" src="ballistics.js"></script>
 	<style>
-	     header { font-family : arial, sans-serif; font-size : 24pt; font-weight: bold; }
-		table,#console { font-family : arial, sans-serif; font-size : 10pt;}
-		.zero      { color : blue; }
-		.unethical { color : orange; }
-		.nonlethal { color : red; }
-		.range  { float : left; width : 8ex; text-align : right; margin-right : 2ex; }
-		.speed  { float : left; width : 8ex; text-align : right; margin-right : 2ex; }
-		.energy { float : left; width : 8ex; text-align : right; margin-right : 2ex; }
-		.path    { float : left; width : 8ex; text-align : right; margin-right : 2ex; }
-		.windage { float : left; width : 6ex; text-align : right; margin-right : 2ex; }
-		.time    { float : left; width : 6ex; text-align : right; margin-right : 2ex; }
+	header { font-family : arial, sans-serif; font-size : 18px; font-weight: bold; }
+	table,#console { font-family : arial, sans-serif; font-size : 14px;}
+	.results { display : table; font-size : 14px; border : 1px solid rgba(0,0,0,0.2);  margin : 12px auto;	 }
+	.results .header { font-weight : bold; text-align : center; border : none; }
+	.row { display : table-row; border-top : 1px solid rgba(0,0,0,0.1); }
 
-td.number { padding-right : 1ex;  padding-left : 0px; text-align : right;}
-.number input { text-align : right; width : 5em;}
+	.col {
+		display : table-cell;
+		padding-top : 2px;
+		padding-bottom : 2px;
+		padding-left : 4px;
+		padding-right : 4px;
+		text-align : right;
+		border-top : 1px solid rgba(0,0,0,0.1);
+	}
+	.header .col { text-align : center; border : none; }
+
+	div.results div.row:nth-child(even) { background : rgba(64, 64, 128, 0.03);   }
+	div.results div.row:nth-child(odd)  { background : rgba(64, 64, 128, 0.06);   }
+	div.row	div.col:nth-child(even)     { background : rgba(64, 64, 128, 0.03);  }
+	div.row div.col:nth-child(odd)      { background : rgba(64, 64, 128, 0.06);   }
+
+	.zero      { color : blue; }
+	.unethical { color : #c93; }
+	.nonlethal { color : red; }
+
+	.range      { width :  8ex; }
+	.speed      { width :  6ex; }
+	.energy     { width :  6ex; }
+	.path       { width : 10ex; }
+	.clicks     { width : 10ex; }
+	.moa        { width :  6ex; }
+	.windage    { width :  6ex; }
+	.windeflect { width :  6ex; }
+	.time       { width :  6ex; }
+	.edges      { width :  3ex; color : #aaa;   }
+
+	td.number { padding-right : 1ex;  padding-left : 0px; text-align : right;}
+	.number input { text-align : right; width : 48px;}
+
+	@media screen {
+		#inputform {  }
+		.info { font-style : italic; color : #999; font-size : 90% }
+	}
+	@media print {
+		#inputform, .info { display : none; }
+	}
+	#layout {
+	  display: flex;
+	  flex-flow: row wrap;
+
+	}
+	#inputform {
+		margin : 12px 12px;
+	}
+	#console {
+		margin : 12px 12px;
+	}
+	#scope {
+		width : 560px;
+		height : 560px;
+		margin : 12px 12px;
+	}
 	</style>
 <script>
+
+function mb2inhg(mb)
+{
+  return mb / 33.86388;
+}
+
+
 function main()
 {
     var s = 0;
     var k = 0;
+    var mdl    = document.getElementById('md');
+    var model  = parseInt(mdl.options[mdl.selectedIndex].value);
 
     var bc        =  parseFloat(document.getElementById('bc').value); // The ballistic coefficient for the projectile.
     var v         =  parseFloat(document.getElementById('mv').value); // Initial velocity, in ft/s
+    var vdiff     =  parseFloat(document.getElementById('mvdiff').value); // +/- velocity.
     var sh        =  parseFloat(document.getElementById('sh').value) / 25.4; // The Sight height over bore, in inches.
     var angle     =    0.0; // The shooting angle (uphill / downhill), in degrees.
     var zero_m    =  parseFloat(document.getElementById('zr').value);
-    var zero      =  zero_m/0.9144; // The zero range of the rifle, in yards.
-    var windspeed =  1.0 / 0.44704; // The wind speed in miles per hour.
+    var zero_h    =  parseFloat(document.getElementById('zh').value) / 25.4; // zero impact in inces
+    var windspeed =  parseFloat(document.getElementById('ws').value) / 0.44704; // The wind speed in miles per hour.
     var windangle =  90; // The wind angle (0=headwind, 90=right to left, 180=tailwind, 270/-90=left to right)
     var weight    =  parseFloat(document.getElementById('bw').value); // grain
     var maxrange  =  parseFloat(document.getElementById('mr').value);
-   // var vitals    =  parseFloat(document.getElementById('vs').value) / 2.54; 
+    var clicksize =  parseFloat(document.getElementById('cs').value); // one click at 100 m
+
+	var baro = parseFloat(document.getElementById('baro').value); // hPa
+	var temp = parseFloat(document.getElementById('temp').value); // °C
+    var humd = parseFloat(document.getElementById('humd').value)/100; // relative.
+
+	if(isNaN(clicksize))
+		clicksize = 0.700; // mm
+
+	if(isNaN(v) || v < 1000)
+		return;
+
+	if(isNaN(bc))
+	    bc = 0.3;
+
+	if(isNaN(vdiff))
+	   vdiff = 0.0;
+
+	if(isNaN(sh))
+	   sh = 44.0 / 25.4;
+
+	if(isNaN(zero_m))
+	   zero_m = 100.0;
+
+    if(isNaN(zero_h))
+       zero_h = 0.0;
+
+	if(isNaN(windspeed))
+	  windspeed = 0.0;
+
+	if(isNaN(weight))
+	  weight = 100.0;
+
+	if(isNaN(maxrange))
+	  maxrange = 10.0;
+
+    if(isNaN(baro))
+    	baro = 1000;
+
+    if(isNaN(temp))
+    	temp = 10;
+
+    if(isNaN(humd))
+    	humd = 0.65;
+
+
+	var zero      =  zero_m/0.9144; // The zero range of the rifle, in yards.
+
+
+   // var vitals    =  parseFloat(document.getElementById('vs').value) / 2.54;
 
 	if(bc == 0)
 		return;
 
-    // bc = AtmCorrect(bc, 0, 29.59, 100,.7);
+
+	if(document.getElementById('useweather').checked)
+	{
+	    bc = AtmCorrect(bc, 0, hPa_to_inHg(baro), celsius_to_fahrenheit(temp), humd);
+    	document.getElementById('baro').disabled = false;
+		document.getElementById('temp').disabled = false;
+		document.getElementById('humd').disabled = false;
+
+    }
+    else
+    {
+    	document.getElementById('baro').disabled = true;
+		document.getElementById('temp').disabled = true;
+		document.getElementById('humd').disabled = true;
+    }
+
     var output = ""
+	var zeroangle = MOAtoDeg(parseFloat(document.getElementById('za').value));
+	if(isNaN(zeroangle))
+		zeroangle = 0.0
 
-    var zeroangle = ZeroAngle(G1, bc, v, sh, zero, 0);
-    var result = SolveAll(G1, bc, weight, v, sh, angle, zeroangle, windspeed, windangle);
-    //DragFunction, DragCoefficient, Vi, SightHeight, VitalSize
-    // result.pbr_zero = PointBlankSolution(G1, bc, v, sh, vitals);
+    if(!document.getElementById('useza').checked)
+    {
+    	zeroangle = ZeroAngle(model, bc, v, sh, zero, zero_h);
+    	document.getElementById('za').value = DegtoMOA(zeroangle).toFixed(2);
+    	document.getElementById('zr').disabled = false;
+		document.getElementById('za').disabled = true;
+    }
+    else
+    {
+    	document.getElementById('zr').disabled = true;
+    	document.getElementById('za').disabled = false;
+    }
+    var result = SolveAll(model, bc, weight, v, sh, angle, zeroangle, windspeed, windangle);
+    var sln = result.solutions;
 
-	var sln = result.solutions;
+    result.res_sup = SolveAll(model, bc, weight, v+vdiff, sh, angle, zeroangle, windspeed, windangle);
+    result.res_sub = SolveAll(model, bc, weight, v-vdiff, sh, angle, zeroangle, windspeed, windangle);
 
 	result.maxrange= maxrange;
+	result.clicksize = clicksize;
 
-    output += "ZeroAngle is " +(zeroangle * 60).toFixed(2) + " MOA<br/>";
-    output += "High point is at " + result.maxpathrange.toFixed(1) + " m with sightline offset of " + (result.maxpath*2.54).toFixed(1) + " cm<br/>";
-    // output += "pbr zero : " + (result.pbr_zero/0.9144).toFixed(1) + " m <br/>";
 
-    for (s=0;s<=maxrange;s+=25)
+	output +=
+	'<div class="results"><div class="header row"><div class="col range">Fjarl.</div>' +
+	'<div class="col speed">Hraði</div>'  +
+	'<div class="col energy">Orka</div>' +
+	'<div class="col path">Ferill</div>' +
+	'<div class="col clicks">(clicks)</div>'+
+	'<div class="col moa">(MOA)</div>' +
+	'<div class="col windage">Fok </div>' +
+	'<div class="col windage">&harr;</div>' +
+	'<div class="col windeflect">Fok</div>' +
+	'<div class="col windeflect">&varr;</div>' +
+	'<div class="col time">Tími</div>' +
+	'</div>';
+
+    for (s=25;s<=maxrange;s+=25)
     {
     	if(sln[s] == undefined)
     		break;
-
-    	if(zero_m == s)
-    		output += '<div class="zero">'
+		var clss = 'row';
+		if(zero_m == s)
+    		clss += ' zero';
     	else if(sln[s].energy < 850)
-    		output += '<div class="nonlethal">';
-    	else if(sln[s].energy < 1200)
-    	    output += '<div class="unethical">';
-    	else
-    		output += '<div>';
+    		clss += ' nonlethal';
+    	else if(sln[s].energy < 1300)
+    	    clss += ' unethical';
 
-		output +=
-		'<div class="range">'  + (sln[s].range * 0.9144).toFixed(0) + "</div>" +
-		'<div class="speed">'  + (sln[s].velocity).toFixed(0) + "</div>"  +
-		'<div class="energy">' + (sln[s].energy).toFixed(0) + "</div>" +
-		'<div class="path">' + (sln[s].path * 2.54).toFixed(1)+ "</div>" +
-		'<div class="windage">' + (sln[s].windage*2.54).toFixed(1)+ "</div>" +
-		'<div class="time">' + (sln[s].time).toFixed(3) + "</div>" +
-		'</div><br />';
+        output += '<div class="' + clss + '">' +
+		'<div class="col range">'  + (sln[s].range * 0.9144).toFixed(0) + "</div>" +
+		'<div class="col speed">'  + (sln[s].velocity).toFixed(0) + "</div>"  +
+		'<div class="col energy">' + (sln[s].energy).toFixed(0) + "</div>" +
+		'<div class="col path">'   + (sln[s].path * 25.4).toFixed(0) +  " &pm;" +		((result.res_sup.solutions[s].path-result.res_sub.solutions[s].path)/2 * 25.4).toFixed(0)	 + "</div>" +
+		'<div class="col clicks">' + ((sln[s].path * 25.4)/(clicksize * s / 100)).toFixed(1) + "  &pm;" +		((result.res_sup.solutions[s].path-result.res_sub.solutions[s].path)/2 * 25.4 / (clicksize*s/100)).toFixed(1) + "</div>" +
+		'<div class="col moa">(' +  (RadtoMOA(Math.atan(sln[s].path * 0.0254/s))).toFixed(1) + ")</div>" +
+		'<div class="col windage">'    + (sln[s].windage*25.4).toFixed(0)+ "</div>" +
+		'<div class="col windage">['    + ((sln[s].windage*25.4)/(clicksize * s / 100)).toFixed(1)+ "]</div>" +
+		'<div class="col windeflect">' + (sln[s].windage*25.4 * 0.5).toFixed(0) + "</div>" +
+		'<div class="col windeflect">[' + ((sln[s].windage*25.4*0.50)/(clicksize * s / 100)).toFixed(1) + "]</div>" +
+		'<div class="col time">' + (sln[s].time).toFixed(3) + "</div>" +
+		'</div>';
    }
 
+   output += "</div><p>Point blank vital size: " + (2*result.maxpath*2.54).toFixed(1) + " cm ";
+   output += "and range " + (result.outerpathrange*0.9144).toFixed(1) + " m &mdash; ";
+   output += "Zero is at: " +  result.zeroat.toFixed(1) + " m</p>";
    document.getElementById("console").innerHTML = output;
    return result;
 }
 
+
+function scope(results)
+{
+      var canvas   = document.getElementById('scope');
+      var context  = canvas.getContext('2d');
+      context.fillStyle = "#ccc";
+	  context.clearRect(0, 0, canvas.width, canvas.height);
+      var clickoffset = parseInt(document.getElementById('co').value);
+
+      var imageObj = new Image();
+      imageObj.onload = function() {
+		  var cx = 280;
+		  var cy = 280;
+		  var r1 = 198;
+		  var r2 = 210;
+         context.drawImage(imageObj,0,0);
+
+          context.beginPath();
+		  context.arc(cx, cy, r1, 0, 2 * Math.PI, false);
+
+
+		   context.lineWidth = 1;
+		   context.strokeStyle = '#011A5A';
+           context.stroke();
+
+		  context.beginPath();
+		  context.strokeStyle="#011A5A";
+		  context.lineWidth = 12;
+		  context.font = '16pt Calibri bold';
+		  // textAlign aligns text horizontally relative to placement
+  		  context.textAlign = 'center';
+		  // textBaseline aligns text vertically relative to font style
+		  context.textBaseline = 'middle';
+		  context.fillStyle = '#011A5A';
+
+		  var startclick = -results.solutions[100].path * 25.4/results.clicksize;
+		  for(s=125; s<=results.maxrange; s += 25)
+		  {
+			  var clicks = ((-results.solutions[s].path * 25.4)/(results.clicksize * s / 100));
+			  var angle = (clicks - clickoffset) / 35 * 2 * Math.PI;
+
+			  // draw a line segment
+			  var xs = Math.cos(angle);
+			  var ys = Math.sin(angle);
+
+			  if(Math.abs(clicks - startclick) < 35)
+			  {
+			  	context.moveTo(cx + ys * r1, cy - xs*r1);
+			  	context.lineTo(cx + ys * r2, cy - xs*r2);
+			  }
+			  else
+			  {
+			  	context.moveTo(cx + ys * r1, cy - xs*r1);
+			  	context.lineTo(cx + ys * (2*r1-r2), cy - xs * (2*r1-r2));
+			  }
+		  }
+		  r2 = 235;
+		  for(s=100; s<=results.maxrange; s += 50)
+		  {
+			  var clicks = ((-results.solutions[s].path * 25.4)/(results.clicksize * s / 100));
+			  var angle = (clicks - clickoffset) / 35 * 2 * Math.PI;
+
+			  // draw a line segment
+			  var xs = Math.cos(angle);
+			  var ys = Math.sin(angle);
+
+			  if(Math.abs(clicks - startclick) < 35)
+			  {
+			  	context.moveTo(cx + ys * r1, cy - xs*r1);
+			  	context.lineTo(cx + ys * r2, cy - xs*r2);
+		        context.fillText(s, cx + ys * (r2+25), cy - xs*(r2+12));
+			  }
+			  else
+			  {
+			  	context.moveTo(cx + ys * r1, cy - xs*r1);
+			  	context.lineTo(cx + ys * (2*r1-r2), cy - xs * (2*r1-r2));
+			  	context.fillText(s, cx + ys * (2*r1-r2 - 25), cy - xs*(2*r1-r2-12));
+			  }
+
+
+		  }
+
+		  context.stroke();
+
+		  context.stroke();
+
+      };
+      imageObj.src = 'scope_clean.png';
+
+}
+
+
 function redraw()
 {
-  var results = main();
-  var drawingCanvas = document.getElementById('myDrawing');
-  drawingCanvas.width = drawingCanvas.width;
-  var border = 0;
 
-  function mapX(x) { return x/results.maxrange  * (drawingCanvas.width - border*2) + border;  }
+ var results = main();
+    if(results == undefined)
+    	return;
 
-  function mapY(y) {  return drawingCanvas.height - (y/1000.0 * (drawingCanvas.height - border*2) + border + drawingCanvas.height/2);  }
+    scope(results);
+
+ 	return;
+
+    var drawingCanvas = document.getElementById('myDrawing');
+     drawingCanvas.width = drawingCanvas.width;
+    var border = 0;
+
+    function mapX(x) { return x/results.maxrange  * (drawingCanvas.width - border*2) + border;  }
+
+  	function mapY(y) {  return drawingCanvas.height - (y/1000.0 * (drawingCanvas.height - border*2) + border + drawingCanvas.height/2);  }
 
 
-  // Check the element is in the DOM and the browser supports canvas
+    // Check the element is in the DOM and the browser supports canvas
 
   if(drawingCanvas.getContext)
   {
  	  // Initaliase a 2-dimensional drawing context
-    var context = drawingCanvas.getContext('2d');
+	var context = drawingCanvas.getContext('2d');
 	context.fillStyle = "#ffffff";
-    context.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+	context.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
 
+	sln = results.solutions;
+	slnp = results.res_sup.solutions;
+	slnb = results.res_sub.solutions;
 
-    sln = results.solutions;
 	context.beginPath();
 	context.strokeStyle="#00000";
 	context.lineWidth = 0.125;
@@ -130,47 +389,72 @@ function redraw()
 	}
 
 	context.stroke();
-/*
+
+
+	// killzone
 	context.beginPath();
-	context.strokeStyle = "#003399";
-	context.lineWidth = 0.5;
-	var fromX = mapX(results.pbr.min_range / 0.9144);
-	var toX = mapX(results.pbr.max_range / 0.9144);
-	var fromY = mapY(-results.pbr.vitals/2 * 25.4);
-	var toY   = mapY(results.pbr.vitals/2 * 25.4);
-	
+	context.lineWidth = 1;
+	var fromX = mapX(0);
+	var toX = mapX(results.outerpathrange*0.9144);
+	var fromY = mapY(results.outerpath * 25.4);
+	var toY   = mapY(results.maxpath*25.4);
+	context.fillStyle="rgba(0,70,100,0.1)";
 	context.rect(fromX, fromY, (toX - fromX), (toY - fromY));
-	context.stroke();
-	*/
-	context.beginPath();
+	context.fill();
+	// context.stroke();
+
+
+
 	context.strokeStyle = "#000000";
-	context.lineWidth = 0.5;
-	context.moveTo(mapX(0), mapY(sln[0].path*25.4));
 
-    for(s=1; s<=results.maxrange; s++)
-    {
-       context.lineTo(mapX(s), mapY(sln[s].path*25.4));
-    }
-
-
-
+	// horizontal sightline.
+	context.beginPath();
 	context.moveTo(mapX(0), mapY(0));
 	context.lineTo(mapX(results.maxrange), mapY(0));
 	context.stroke();
 
+
+	//  main bullet path
+	context.beginPath();
+	context.lineWidth = 0.5;
+
+	context.moveTo(mapX(0), mapY(sln[0].path*25.4));
+	for(s=1; s<=results.maxrange; s++)
+	{
+		context.lineTo(mapX(s), mapY(sln[s].path*25.4));
+    	}
+
+	context.stroke();
+
+
+
+	// bullet straying due to variation in muzzle speed.
+	context.beginPath();
+	context.fillStyle="rgba(0,0,0,0.1)";
+	context.moveTo(mapX(0), mapY(slnb[0].path*25.4));
+
+	for(s=1; s<=results.maxrange; s++)
+		context.lineTo(mapX(s), mapY(slnb[s].path*25.4));
+
+	for(s=results.maxrange; s>=0; s--)
+		context.lineTo(mapX(s), mapY(slnp[s].path*25.4));
+	context.fill();
+
+
+	// high point
 	context.beginPath();
 	context.strokeStyle = "#eecc00";
-
 	context.moveTo(mapX(0), mapY(results.maxpath * 25.4));
 	context.lineTo(mapX(results.maxrange), mapY(results.maxpath * 25.4));
-	context.moveTo(mapX(results.maxpathrange), mapY(-500));
-	context.lineTo(mapX(results.maxpathrange), mapY(500));
+	context.moveTo(mapX(results.maxpathrange*0.9144), mapY(-500));
+	context.lineTo(mapX(results.maxpathrange*0.9144), mapY(500));
 	context.stroke();
 
   }
 }
 
-function spin(event, step)
+
+function spinTemp(event)
 {
 	if(event != undefined)
 	{
@@ -182,12 +466,87 @@ function spin(event, step)
        // alert(keyCode + "  " + event.target.value);
        if(keyCode == 38)
        {
-       	   event.target.value = parseFloat(event.target.value) + step;
+       	   event.target.value = (parseFloat(event.target.value) + 1).toFixed(0);
        	   // redraw();
        }
        else if(keyCode == 40)
        {
-       	   event.target.value = Math.max(parseFloat(event.target.value) - step, 0);
+       	   event.target.value = (parseFloat(event.target.value) - 1).toFixed(0);
+       	  // redraw();
+       }
+   }
+}
+function spin(event, step, round)
+{
+	if(event != undefined)
+	{
+       var keyCode = event.which;
+
+      if (keyCode == undefined)
+            keyCode = event.keyCode;
+
+       // alert(keyCode + "  " + event.target.value);
+       if(keyCode == 38)
+       {
+       	   event.target.value = (parseFloat(event.target.value) + step).toFixed(round);
+       	   // redraw();
+       }
+       else if(keyCode == 40)
+       {
+       	   event.target.value = (Math.max(parseFloat(event.target.value) - step, 0)).toFixed(round);
+       	  // redraw();
+       }
+   }
+}
+
+
+function spinall(event, step, round)
+{
+	if(event != undefined)
+	{
+       var keyCode = event.which;
+
+      if (keyCode == undefined)
+            keyCode = event.keyCode;
+
+       // alert(keyCode + "  " + event.target.value);
+       if(keyCode == 38)
+       {
+       	   event.target.value = (parseFloat(event.target.value) + step).toFixed(round);
+       	   // redraw();
+       }
+       else if(keyCode == 40)
+       {
+       	   event.target.value = (parseFloat(event.target.value) - step).toFixed(round);
+       	  // redraw();
+       }
+   }
+}
+
+function moaspin(event)
+{
+    var clicksize =  parseFloat(document.getElementById('cs').value); // one click at 100 m
+    if(isNaN(clicksize))
+        clicksize = 7.00; // mm
+
+    var step = RadtoMOA(Math.atan(clicksize / 100000));
+    var round = 9;
+    if(event != undefined)
+    {
+       var keyCode = event.which;
+
+       if (keyCode == undefined)
+            keyCode = event.keyCode;
+
+       // alert(keyCode + "  " + event.target.value);
+       if(keyCode == 38)
+       {
+       	   event.target.value = (parseFloat(event.target.value) + step).toFixed(round);
+       	   // redraw();
+       }
+       else if(keyCode == 40)
+       {
+       	   event.target.value = (parseFloat(event.target.value) - step).toFixed(round);
        	  // redraw();
        }
    }
@@ -202,20 +561,60 @@ function spin(event, step)
 <body>
 <header>Standard Model</header>
 <nav></nav>
-<table cellspacing="0">
-<tr><td>BC:</td><td class="number" ><input onkeyup="redraw();"                            type="text" value="0.261" id="bc"    /></td></tr>
-<tr><td>Hraði við hlaupenda </td><td class="number" ><input onkeyup="redraw();" onkeydown="spin(event,10)" type="text" value="2850"  id="mv"  /></td><td>fps</td></tr>
-<tr><td>Þyngd</td><td class="number" ><input onkeyup="redraw();" onkeydown="spin(event,5)"  type="text" value="100"   id="bw"  /></td><td>gr</td></tr>
-<tr><td>Núllfjarlægð</td><td class="number" ><input onkeyup="redraw();" onkeydown="spin(event,5)" type="text" value="100"   id="zr"  /></td><td>m</td></tr>
-<!--<tr><td>Þvermál ákomusvæðis</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 5)" type="text" value="14" id="vs"/></td><td>cm</td></tr> -->
-<tr><td>Kíkismiðja frá hlaupmiðju</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 1)" type="text" value="44" id="sh"></td><td>mm</td></tr>
-<tr><td>Reikna út í</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 50)" type="text" value="300" id="mr"></td><td>m</td></tr>
-</table>
+<div class="info">
 
-<div id="console" style="width:60ex; float: left;"></div>
-<canvas id="myDrawing" width="400" height="301" style="border:1px solid #ccc;">
-<p>Your browser doesn't support canvas.</p>
+Sierra 70gr HPBT Matchking #1505 -
+.259 @ 2800 fps and above,
+.257 between 2200 and 2800 fps,
+.270 @ 2200 fps and below<br />
+
+Sierra 90gr FMJBT #1535 -
+.387 @ 2800 fps and above,
+.376 between 2800 and 2100 fps,
+.368 @ 2100 fps and below <br />
+
+Sierra 100gr SPBT #1560 -
+.430 @ 2800 fps and above,
+.419 between 2800 and 2200 fps,
+.397 between 2200 and 1700 fps,
+.385 @ 1700 fps and below <br />
+
+Norma 100gr Oryx: 0.261 <br />
+Nosler Ballistic Tip 95gr: 0.379 <br />
+Nosler 100gr Partition : 0.384<br/>
+</div>
+<div id="layout">
+<div id="inputform">
+	<table cellspacing="0">
+	<tr><td><select id="md" onchange="redraw()"><option value="1" selected>G1</option><option value="7">G7</option></select> BC:</td><td class="number" ><input onkeyup="redraw();" type="text" value="0.379" id="bc" /></td></tr>
+	<tr><td>Hraði við hlaupenda </td><td class="number" >
+	<input onkeyup="redraw();" onkeydown="spin(event,5,0)" type="text" value="2990"  id="mv"  /> +/-
+	<input onkeyup="redraw();" onkeydown="spin(event,1,0)" type="text" value="25"  id="mvdiff" style="width:3ex;"  />
+	</td><td>fps</td></tr>
+	<tr><td>Þyngd</td><td class="number" ><input onkeyup="redraw();" onkeydown="spin(event,5,0)"  type="text" value="100"   id="bw"  /></td><td>gr</td></tr>
+	<tr><td>Núllfjarlægð</td><td class="number" ><input onkeyup="redraw();" onkeydown="spin(event,5,0)" type="text" value="100"   id="zr"  /></td><td>m</td></tr>
+	<tr><td>Núllákoma</td><td class="number" ><input onkeyup="redraw();" onkeydown="spinall(event, 1, 0)" type="text" value="0" id="zh" /></td><td>mm</td></tr>
+	<tr><td>Kíkisklikk</td><td class="number" ><input onkeyup="redraw();" type="text" value="7.0" id="cs" /></td><td>mm @ 100m</td></tr>
+	<tr><td><input type="checkbox" id="useza" onclick="redraw();"/>Horn:</td><td class="number"><input onkeyup="redraw();" onkeydown="moaspin(event)" type="text" value="3.97" id="za"/></td><td>MOA</td></tr>
+	<tr><td>Kíkismiðja frá hlaupmiðju</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 1,0)" type="text" value="47" id="sh" /></td><td>mm</td></tr>
+	<tr><td>Vindhraði þvert</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 1,0)" type="text" value="5" id="ws"></td><td>m/s</td></tr>
+	<tr><td>Reikna út í</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 50, 0)" type="text" value="300" id="mr"></td><td>m</td></tr>
+	<tr><td>Núllklikk</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 1, 0)" type="text" value="7" id="co"></td><td>klikk</td></tr>
+	<tr><td><input type="checkbox" id="useweather" onclick="redraw();"/> Leiðrétta fyrir veðurskilyrði</td><td></td></tr>
+	<tr><td>Loftþrýstingur á stað:</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 1,0)" type="text" value="1015" id="baro"></td><td>hPa</td></tr>
+	<tr><td>Hitastic:</td><td class="number"><input onkeyup="redraw();" onkeydown="spinTemp(event)" type="text" value="10" id="temp"></td><td>°C</td></tr>
+	<tr><td>Loftraki</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 1,0)" type="text" value="50" id="humd"></td><td>%</td></tr>
+	</table>
+</div>
+<div id="console"></div>
+
+<canvas id="scope" width="560" height="560">
 </canvas>
+</div>
+<!-- <canvas id="myDrawing" width="800" height="401" style="border:1px solid #ccc;">
+ This document uses HTML5 which is not supported in your browser. Get a modern browser like Chrome, Firefox or Opera.
+</canvas> -->
+
 <script>
 redraw();
 </script>
