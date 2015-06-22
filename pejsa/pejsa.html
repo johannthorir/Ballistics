@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+* { font-family : sans-serif; }
+td.number { padding-right : 1ex;  padding-left : 0px; text-align : right;}
+.number input { text-align : right; width : 5em;}
+#stuff table td,th { border-bottom : 1pt solid black; }
+#stuff td { padding-right : 15px; padding-left : 15px;  }
+#stuff table th { background-color #eeeeee; -webkit-print-color-adjust:exact; }
+#stuff table tr:nth-child(even) {  background-color: #dddddd; -webkit-print-color-adjust:exact; }
+
+#dope table td,th { border-bottom : 1pt solid black; }
+#dope td { padding-right : 10px; padding-left : 10px;  }
+#dope table th { background-color #eeeeee; -webkit-print-color-adjust:exact; }
+#dope table tr:nth-child(even) {  background-color: #dddddd; -webkit-print-color-adjust:exact; }
+
+@media print { #inputform { display : none; } }
+#results { text-align:right; width:72ex; }
+
+</style>
+<script language="JavaScript">
+// Pejsa ballistics formulas.
+
+var mm_pr_click_100       = 7;
+var inch_pr_click_100     = 0.252;
+var inch_pr_moa_100       = 1.047;
+var mayewski_constant = 246.0;
+
+
+// Settings
+
+var  wind_angle    =   90.0;  // wind angle in degrees
+var  M_PI = Math.PI;
+
+
+function Bullet(name, bc, shape, weight, speed, tempsens)
+{
+   this.name = name;
+   this.bc = bc;
+   this.shape = shape;
+   this.weight = weight;
+   this.speed = speed;  // default speed to show.
+   this.tempsens = tempsens; // temperature sensitivity + fps pr degree temperature increase.
+
+}
+
+var bullets = [
+    new Bullet("Lapua Scenar L 90",    0.457, 0.5,   90.0, 2942.0, 3.1),
+    new Bullet("Berger 88gr FB",       0.391, 0.40,  88.0, 2954.0, 3.1),
+    new Bullet("Norma Oryx 100",       0.261, 0.40, 100.0, 2850.0, 3.2),
+    new Bullet("Sierra GK SPBT 100",   0.419, 0.48, 100.0, 2923.0, 3.2 ),
+    new Bullet("Sierra GK FMJ 90",     0.376, 0.48,  90.0, 3050.0, 3.1 ),
+    new Bullet("Sierra MK HPBT 70",    0.260, 0.48,  70.0, 3270.0, 2.2 ),
+    new Bullet("Nosler BT 95",         0.382, 0.47,  95.0, 3030.0, 3.1 ),
+    new Bullet("Nosler Partition 100", 0.395, 0.45, 100.0, 2950.0, 3.2 ),
+    new Bullet("Hornady V-Max 75",     0.330, 0.48,  70.0, 3230.0, 2.25 )
+];
+
+
+function setBullet(i)
+{
+   var b = bullets[i];
+   document.getElementById("bullet_name").innerHTML = b.name;
+   document.getElementById('bc').value = b.bc;
+   document.getElementById('rcr').value = b.shape;
+   document.getElementById('bw').value = b.weight;
+   document.getElementById('mv').value = b.speed;
+   document.getElementById('ts').value = b.tempsens;
+
+   loaded();
+}
+
+
+// =_C*(460+_TE)/(519-_AL/280)*EXP(_AL/31654)*(2-_PR/_PR0)
+
+//=_F*(460+_TE)/(519)*(2-_PR/1000)
+
+function loaded()
+{
+	var  wind_speed    =    parseFloat(document.getElementById('ws').value) / 0.44704;  // wind speed in miles/hour
+
+	var  ballistic_coefficient = parseFloat(document.getElementById('bc').value);
+	var  retard_coeff_rate     = parseFloat(document.getElementById('rcr').value);
+	var  bullet_weight         = parseFloat(document.getElementById('bw').value);
+	var  zero_range            = parseFloat(document.getElementById('zr').value) / 0.9144;
+	var  scope_height          = parseFloat(document.getElementById('sh').value) / 25.4;
+	var  sighting_temperature  = parseFloat(document.getElementById('tcs').value);
+	var  sighting_pressure     = parseFloat(document.getElementById('prs').value);
+	var  temperature           = parseFloat(document.getElementById('tc').value);
+	var  air_pressure          = parseFloat(document.getElementById('pr').value);
+	var  sighting_velocity       = parseFloat(document.getElementById('mv').value);
+	var  tempsens              = parseFloat(document.getElementById('ts').value);
+	var  muzzle_velocity       = sighting_velocity + (temperature - sighting_temperature)*tempsens;
+
+
+    var  i;
+    var   retard_coeff     = ballistic_coefficient * mayewski_constant * Math.pow(muzzle_velocity, 0.45);
+
+	var pressure_factor    = (2.0 - air_pressure / 1000.0);
+	var temperature_factor = (2460 + 9 * temperature)/2595;
+    var adj_retard_coeff   = retard_coeff * pressure_factor * temperature_factor;
+	var sighting_retard_coeff = retard_coeff * (2.0 - sighting_pressure/1000.0) * (2460 + 9 * sighting_temperature)/2595;
+    var drop_at_zero       = Math.pow((41.68/sighting_velocity)/((1/zero_range) - (1/(sighting_retard_coeff-(0.75 + 0.00006*zero_range) * retard_coeff_rate * zero_range))), 2);
+	var t = ("<table id='results'  cellspacing='0'>");
+   	t += ("<tr style='text-align:center;background-color:#aaaaaa;border-top:1px solid black;'><th>Range</th><th style='border-left:1px solid black;'>Velocity</th><th style='border-left:1px solid black;'>Energy</th><th  style='border-left:1px solid black;' colspan='2'>Drop</th><th style='border-left:1px solid black;' colspan='2'>Path</th><th style='border-left:1px solid black;'>Wind</th><th style='border-left:1px solid black;'>Time</th></tr>");
+   	t += ("<tr style='text-align:center;'><th>m</th><th style='border-left:1px solid black;'>ft/s</th><th style='border-left:1px solid black;'>ft.lbs</th><th style='border-left:1px solid black;'>cm</th><th>clicks</th><th style='border-left:1px solid black;'>cm</th><th>Clicks up</th><th style='border-left:1px solid black;'>cm</th><th style='border-left:1px solid black;'>s</th></tr>");
+
+
+	for(i=1; i<=10; i++)
+    {
+        var  r = i * 50;
+        var  range = r / 0.9144; // yards
+        var  speed   = muzzle_velocity*Math.pow(1-3*retard_coeff_rate*range/adj_retard_coeff, 1/retard_coeff_rate);
+        var  energy  = bullet_weight * Math.pow(speed, 2) / 450380.0;
+        var  drop    = Math.pow((41.68/muzzle_velocity)/((1/(range)) - (1/(adj_retard_coeff-(0.75 + 0.00006*range) * retard_coeff_rate * range))), 2);
+		var  drop_clicks = range > 0 ? (drop * (100/range)/inch_pr_click_100).toFixed(1) : '-';
+        var  path    = (drop_at_zero + scope_height) * range/zero_range - (drop + scope_height);
+        var  path_clicks = range > 0 ? (-path * (100/range)/inch_pr_click_100).toFixed(1) : '-';
+        var  windage     = range > 0 ? (79.2*range*wind_speed/muzzle_velocity/(adj_retard_coeff/range-1-retard_coeff_rate)) * Math.sin(wind_angle/180*M_PI) : 0;
+        var  windage_moa = range > 0 ? windage * (100/range)/inch_pr_moa_100 : 0;
+        var  time    = (adj_retard_coeff/muzzle_velocity) / (1 - retard_coeff_rate) * (Math.pow(muzzle_velocity/speed, 1-retard_coeff_rate) - 1);
+     	t += ("<tr class=\""+(i%2 ? 'even' : 'odd')+"\"><td>"+r.toFixed(0)+"</td><td style='border-left:1px solid black;'>"+speed.toFixed(0)+"</td><td style='border-left:1px solid black;'>"+energy.toFixed(0)+"</td><td style='border-left:1px solid black;'>"+(drop * 2.54).toFixed(1) + "</td><td>" + drop_clicks +  "</td><td style='border-left:1px solid black;'>"+(path * 2.54).toFixed(1)+"</td><td>" + path_clicks + "</td><td style='border-left:1px solid black;'>"+(windage*2.54).toFixed(1)+"</td><td style='border-left:1px solid black;'>"+time.toFixed(3)+ "</td></tr>");
+
+    }
+    t += "</table>";
+	document.getElementById("stuff").innerHTML = t;
+	document.getElementById("bullet_weight").innerHTML = bullet_weight;
+	document.getElementById("speed").innerHTML = muzzle_velocity;
+	document.getElementById("wmetric").innerHTML = (wind_speed * 0.447).toFixed(1);
+
+	// vary temperature at sighting pressure.
+	// first calculate the drops at the sighting in conditions
+	var drops = [];
+	var windages = [];
+
+	for(i=1; i<=10; i++)
+	{
+		var  r = i * 50;
+		var  range = r / 0.9144; // yards
+		windages[i] =  range > 0 ? (79.2*range*wind_speed/sighting_velocity/(sighting_retard_coeff/range-1-retard_coeff_rate)) * Math.sin(wind_angle/180*M_PI) : 0;
+		drops[i]    = Math.pow((41.68/sighting_velocity)/((1/(range)) - (1/(sighting_retard_coeff-(0.75 + 0.00006*range) * retard_coeff_rate * range))), 2);
+	}
+	var dropdiffs = [];
+	var winddiffs = [];
+	var dh = "<table cellspacing='0' cellpadding='0'><tr style='text-align:center;background-color:#aaaaaa;'><th>Fjarl.</th>";
+	for(var j = 0; j < 7; j++)
+	{
+		var temperature = j * 5 - 5;
+		dh += "<th>" + temperature.toFixed(0) + "&deg;C </th>";
+		dropdiffs[j] = [];
+		winddiffs[j] = [];
+		var _velocity     = sighting_velocity + (temperature - sighting_temperature)*tempsens;
+	    var _retard_coeff = retard_coeff * (2.0 - sighting_pressure/1000.0) * (2460 + 9 * temperature)/2595;
+
+		for(i=1; i<=10; i++)
+		{
+			var  r = i * 50;
+			var  range = r / 0.9144; // yards
+
+			var  drop    = Math.pow((41.68/_velocity)/((1/(range)) - (1/(_retard_coeff-(0.75 + 0.00006*range) * retard_coeff_rate * range))), 2);
+			var  windage  = range > 0 ? (79.2*range*wind_speed/_velocity/(_retard_coeff/range-1-retard_coeff_rate)) * Math.sin(wind_angle/180*M_PI) : 0;
+
+			dropdiffs[j][i] = drops[i] - drop;
+			winddiffs[j][i] = windages[i] - windage;
+		}
+	}
+	dh += "</tr>";
+
+	for(i=1; i<=10; i++)
+	{
+		dh += "<tr style='text-align:right;'><td class='rangecol'>" + (i*50).toFixed(0) + " m</td>";
+		var  range = (i*50) / 0.9144; // yards
+		for(j=0; j<7; j++)
+		{
+			dh += "<td style='border-left:1px solid black;'>" + (range > 0 ? (-dropdiffs[j][i] * (100/range)/inch_pr_click_100).toFixed(1) : '-') + "</td>";
+
+		}
+		dh += "</tr>";
+	}
+	dh += "</table>";
+
+	document.getElementById("dope").innerHTML = dh;
+}
+
+
+function spin(event, step)
+{
+	if(event != undefined)
+	{
+       var keyCode = event.which;
+
+      if (keyCode == undefined)
+            keyCode = event.keyCode;
+
+       // alert(keyCode + "  " + event.target.value);
+       if(keyCode == 38)
+       {
+       	   event.target.value = parseFloat(event.target.value) + step;
+       	   loaded();
+       }
+       else if(keyCode == 40)
+       {
+       	   event.target.value = Math.max(parseFloat(event.target.value) - step, 0);
+       	   loaded();
+       }
+   }
+}
+</script>
+</head>
+
+<body>
+
+<h2><span id="bullet_name">&nbsp;</span>, <span id="bullet_weight"></span>gr @ <span id="speed"></span> ft/s</h2>
+<table>
+<tr valign="top"><td>
+<table cellspacing="0" id="inputform">
+<tr><td colspan="3"><h3>Forsendur</h3></td></tr>
+<tr><td>Veldu kúlu:</td>              <td colspan="2"    ><select name="bullets" id="bullets" onchange="setBullet(this.selectedIndex);"></select></td></tr>
+<tr><td>BC:</td>                      <td class="number" ><input onkeyup="loaded();"                            type="text" value="0.426" id="bc"    /></td></tr>
+<tr><td>Kúlulag (0.4 fb .. 0.5 bt):</td><td class="number" ><input onkeyup="loaded();"  onkeydown="spin(event,0.05) "                         type="text" value="0.49" id="rcr"    /></td></tr>
+<tr><td>Þyngd</td>                    <td class="number" ><input onkeyup="loaded();" onkeydown="spin(event, 5)" type="text" value="90"   id="bw"  /></td><td>gr</td></tr>
+<tr><td>Hitastigull hraða</td>        <td class="number"> <input onkeyup="loaded();" onkeydown="spin(event, 0.1)" type="text" value="3.1" id="ts" /></td><td>fps / °C</td></tr>
+
+<tr><td>Núllfjarlægð</td>             <td class="number" ><input onkeyup="loaded();" onkeydown="spin(event, 5)" type="text" value="100"   id="zr"  /></td><td>m</td></tr>
+<tr><td>Hraði við núllun</td>      <td class="number" ><input onkeyup="loaded();" onkeydown="spin(event,10)" type="text" value="3030"  id="mv"  /></td><td>fps</td></tr>
+<tr><td>Hitastig við núllun</td>      <td class="number" ><input onkeyup="loaded();" onkeydown="spin(event, 1)" type="text" value="10" id="tcs" /></td><td>°C</td></tr>
+<tr><td>Loftþrýstingur við núllun</td><td class="number" ><input onkeyup="loaded();" onkeydown="spin(event, 5)" type="text" value="1025" id="prs" /></td><td>hPa</td></tr>
+
+<tr><td>Kíkismiðja frá hlaupmiðju</td><td class="number" ><input onkeyup="loaded();" onkeydown="spin(event, 1)" type="text" value="47" id="sh" /></td><td>mm</td></tr>
+<tr><td>Vindhraði þvert</td>          <td class="number" ><input onkeyup="loaded();" onkeydown="spin(event, 1)" type="text" value="5" id="ws" /></td><td>m/s</td></tr>
+<tr><td>Hitastig</td>                 <td class="number" ><input onkeyup="loaded();" onkeydown="spin(event, 1)" type="text" value="10" id="tc" /></td><td>°C</td></tr>
+<tr><td>Loftþrýstingur</td>           <td class="number" ><input onkeyup="loaded();" onkeydown="spin(event, 5)" type="text" value="1025" id="pr" /></td><td>hPa</td></tr>
+</table>
+</td>
+<td style="padding-left:20px">
+<h3>Hliðarvindur <span id="wmetric">4.5</span>m/s</h3>
+
+<p id="stuff">&nbsp; </p>
+<h3>Kíkisklikk til viðbótar við mismunandi hitastig.</h3>
+<p id="dope">&nbsp;</p>
+</td></tr>
+</table>
+<script>
+var select = document.getElementById("bullets");
+
+for(var i = 0; i < bullets.length; i++) {
+    var opt = bullets[i];
+    var el = document.createElement("option");
+    if(i == 0)
+    	el.selected = true;
+
+    el.textContent = opt.name;
+    el.value = i;
+    select.appendChild(el);
+}
+setBullet(0);
+</script>
+</body>
+</html>
+
