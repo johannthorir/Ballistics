@@ -6,7 +6,7 @@ by Derek Yates who licenses it under GNU GPL, although it's iffy that you can di
 the G1 model data by GPL-ing one specific implementation of it in C and therefore it
 will need to be GPL forevahandevahpinkieswear.
 
-Port and additions by Jóhann Þórir Jóhannsson who doesn't license this at all except
+Port and additions by Jï¿½hann ï¿½ï¿½rir Jï¿½hannsson who doesn't license this at all except
 the stuff that was originally GNU which has to continue being GNU, like, it's contaminated
 or something. 
 
@@ -297,6 +297,8 @@ function SolveAll(DragFunction, DragCoefficient, Weight, Vi, SightHeight, Shooti
     var headwind  = HeadWind(WindSpeed, WindAngle);
     var crosswind = CrossWind(WindSpeed, WindAngle);
 
+    console.log(WindSpeed + " is " + crosswind + " across");
+
     var Gy = GRAVITY * Math.cos(DegtoRad((ShootingAngle + ZAngle)));
     var Gx = GRAVITY * Math.sin(DegtoRad((ShootingAngle + ZAngle)));
 
@@ -334,6 +336,7 @@ function SolveAll(DragFunction, DragCoefficient, Weight, Vi, SightHeight, Shooti
             solution.path     = path;                         // Path in inches
             solution.time     = t + dt;                         // Time in s
             solution.windage  = Windage(crosswind,Vi,x,t+dt);   // Windage in inches
+            console.log(solution.windage);
             solution.velocity = v;                              // Velocity (combined)
             solution.energy   = Math.pow(v, 2) /  450380.0 * Weight; 
             solution.vel_x = vx;                             // Velocity (x)
