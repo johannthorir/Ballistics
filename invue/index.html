@@ -20,7 +20,7 @@
         .inputs label { display : inline-block; width : 170px; height : 2.5ex;}
         .inputs  .number { width : 5em; text-align : right; }
         table.solution { border-collapse : collapse; display:inline-block; vertical-align: top ; margin : 1ex; }
-        table.solution td,th { padding-left : 0.4em; padding-right : 0.4em; column-width : 3.8em;}
+        table.solution td,th { padding-left : 0.4em; padding-right : 0.4em; column-width : 3.0em;}
         table.solution td {text-align : right; font-size : 90%; padding-right : 1em;}
         table.solution tr.X { background : rgba(0,0,0,0.1); font-weight : bold; }
         table.solution tr.o { background : rgba(0,0,0,0.05);   }
@@ -81,10 +81,11 @@
         </div>
 
             <table class="solution">
-                <tr><th>Range</th> <th>Path</th>  <th>Clicks</th> <th>Wind</th>  <th>Time</th></tr>
-                <tr><th>m</th>     <th>mm</th>    <th></th>       <th>mm</th>    <th>ms</th>  </tr>
+                <tr><th>Range</th> <th>Speed</th> <th>Path</th>  <th>Clicks</th> <th>Wind</th>  <th>Time</th></tr>
+                <tr><th>m</th>     <th>fps</th>   <th>mm</th>    <th></th>       <th>mm</th>    <th>ms</th>  </tr>
                 <tr v-for="p in solution.path"  :class="p.u">
                     <td>{{ p.x.toFixed(0) }}</td>
+                    <td>{{ p.v.toFixed(0) }}</td>
                     <td>{{ (p.y * 1000).toFixed(0)  }}</td>
                     <td>{{ -p.c.toFixed(1)  }}</td>
                     <td>{{ (p.z * 1000).toFixed(0) }}</td>
@@ -104,7 +105,7 @@
                     class="number"
                     type="text"
                     v-model="displayValue"
-                    @blur="isActive = false"
+                    @blur="isActive = false;"
                     @focus="isActive = true"
                     @keydown.up="inc"
                     @keydown.down="dec"/> {{ unit }}</div>`,
@@ -113,29 +114,27 @@
         },
         methods : {
             inc : function() {
-				this.value += this.step;
-				this.changed();
+                this.$emit('input', this.value + this.step);				
             },
             dec : function() {
-            	this.value -= this.step;
-            	this.changed();
+            	this.$emit('input', this.value - this.step);				
             },
-        	changed : _.debounce(function() { this.$emit('input', this.value); }, 100, { leading : true, maxWait : 500 })
+        	changed : _.debounce(function() { this.$emit('input', parseFloat(this.value.toFixed(this.precision))); }, 100, { leading : true, maxWait : 500 })
         },
 
         computed: {
             displayValue: {
                 get: function() {
-                	if(this.isActive && this.value == 0)
-                		return "";
-                	return this.value.toFixed(this.precision);
+                    console.log("getting")
+                	return parseFloat(this.value.toFixed(this.precision));
                 },
-                set: _.debounce( function(modifiedValue) {
+                set: function(modifiedValue) {
+                    console.log(modifiedValue)
                     var newValue = parseFloat(modifiedValue);
                     if(isNaN(newValue))
-                        newValue = 0;
-                    this.$emit('input', newValue);
-                }, 300, { leading : true, maxWait : 500 })
+                        newValue = 0;                   
+                   this.$emit('input', newValue);
+                }
             }
         }
     });
@@ -153,6 +152,7 @@
         created : function() {
             this.rotating = new Image();
             this.rotating.src    = "assets/rotating.png";
+            this.rotating.onload = this.render;
         },
         methods  : {
         	mmove : function(event) {
@@ -385,25 +385,25 @@
 
 			bound : function(value, min, max) {
 				return Math.max(min, Math.min(value, max));
-			},
+            },
+            // this should not modify....
             solve : function() {
-            	this.projectile.bc           = this.bound(this.projectile.bc, 0.1, 1.0);
-            	this.zeroInfo.speed          = this.bound(this.zeroInfo.speed, 500, 5000);
-				this.zeroInfo.pressure       = this.bound(this.zeroInfo.pressure,       910.0, 1100.0);
-                this.zeroInfo.temperature    = this.bound(this.zeroInfo.temperature,     -30.0, 50.0);
-                this.environment.temperature = this.bound(this.environment.temperature,  -30.0, 50.0);
-                this.environment.pressure    = this.bound(this.environment.pressure,    910.0, 1100.0);
+            	var projectile_bc           = this.bound(this.projectile.bc, 0.1, 1.0);
+            	var zeroInfo_speed          = this.bound(this.zeroInfo.speed, 500, 5000);
+				var zeroInfo_pressure       = this.bound(this.zeroInfo.pressure,       910.0, 1100.0);
+                var zeroInfo_temperature    = this.bound(this.zeroInfo.temperature,     -30.0, 50.0);
+                var environment_temperature = this.bound(this.environment.temperature,  -30.0, 50.0);
+                var environment_pressure    = this.bound(this.environment.pressure,    910.0, 1100.0);
                 // console.log("Solving...")
                 var  sighting_temperature  = this.sm.celsius_to_fahrenheit(this.zeroInfo.temperature);
-                var  sighting_pressure     = this.sm.hPa_to_inHg(this.zeroInfo.pressure);
+                var  sighting_pressure     = this.sm.hPa_to_inHg(zeroInfo_pressure);
                 var  temperature           = this.sm.celsius_to_fahrenheit(this.environment.temperature);
                 var  air_pressure          = this.sm.hPa_to_inHg(this.environment.pressure);
-                var  bc_at_zero            = this.sm.AtmCorrect(this.projectile.bc, 0, sighting_pressure, sighting_temperature, 0.5 );
+                var  bc_at_zero            = this.sm.AtmCorrect(projectile_bc, 0, sighting_pressure, sighting_temperature, 0.5 );
 
-                this.projectile.adjustedSpeed  = this.zeroInfo.speed + (this.environment.temperature - this.zeroInfo.temperature)*this.projectile.tempSens;
-                
-                this.projectile.adjustedBC    = this.sm.AtmCorrect(this.projectile.bc, 0, air_pressure, temperature, 0.5 );
-                this.zeroInfo.zeroAngle = this.sm.ZeroAngle(bc_at_zero, this.zeroInfo.speed, this.scopeInfo.height / 25.4,  this.zeroInfo.range / 0.9144, this.zeroInfo.offset / 25.4);
+                this.projectile.adjustedSpeed  = zeroInfo_speed + (environment_temperature - zeroInfo_temperature)*this.projectile.tempSens;
+                this.projectile.adjustedBC    = this.sm.AtmCorrect(projectile_bc, 0, air_pressure, temperature, 0.5 );
+                this.zeroInfo.zeroAngle = this.sm.ZeroAngle(bc_at_zero, zeroInfo_speed, this.scopeInfo.height / 25.4,  this.zeroInfo.range / 0.9144, this.zeroInfo.offset / 25.4);
 
                 var res = this.sm.SolveAll(
                     this.projectile.adjustedBC,

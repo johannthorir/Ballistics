@@ -320,8 +320,6 @@ function StandardModel(maxRange,dragFunction) {
         var headwind  = HeadWind(WindSpeed, WindAngle);
         var crosswind = CrossWind(WindSpeed, WindAngle);
         
-        console.log("Wind is :" + WindSpeed + " headwind: " + headwind + " crosswind " +  crosswind);
-
         var Gy = GRAVITY * Math.cos(DegtoRad((ShootingAngle + ZAngle)));
         var Gx = GRAVITY * Math.sin(DegtoRad((ShootingAngle + ZAngle)));
 
