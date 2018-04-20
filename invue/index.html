@@ -35,7 +35,7 @@
     <div id="app" v-cloak>
         <h1>{{ projectile.name }} zeroed at {{ zeroInfo.speed }} fps <small>({{projectile.adjustedSpeed.toFixed(0)}} fps)</small></h1>
 
-        <div style="display:block; vertical-align: top; min-width : 24em;">
+        <div style="display:block; min-width : 24em;">
             <h3 v-on:click="projectile.show = !projectile.show">{{projectile.title}}<span v-if="!projectile.show"> ...</span></h3>
             <div class="inputs" v-if="projectile.show">
                 <div class="field"><label>Name</label><input type="text" v-model="projectile.name" size="20"></div>
@@ -84,9 +84,9 @@
                 <tr><th>Range</th> <th>Path</th>  <th>Clicks</th> <th>Wind</th>  <th>Time</th></tr>
                 <tr><th>m</th>     <th>mm</th>    <th></th>       <th>mm</th>    <th>ms</th>  </tr>
                 <tr v-for="p in solution.path"  :class="p.u">
-                    <td>{{ p.x }}</td>
-                    <td>{{ (p.y * 1000).toFixed(0) }}</td>
-                    <td>{{ (-p.c).toFixed(1)  }}</td>
+                    <td>{{ p.x.toFixed(0) }}</td>
+                    <td>{{ (p.y * 1000).toFixed(0)  }}</td>
+                    <td>{{ -p.c.toFixed(1)  }}</td>
                     <td>{{ (p.z * 1000).toFixed(0) }}</td>
                     <td>{{ (p.t * 1000).toFixed(0) }}</td>
                 </tr>
@@ -401,6 +401,7 @@
                 var  bc_at_zero            = this.sm.AtmCorrect(this.projectile.bc, 0, sighting_pressure, sighting_temperature, 0.5 );
 
                 this.projectile.adjustedSpeed  = this.zeroInfo.speed + (this.environment.temperature - this.zeroInfo.temperature)*this.projectile.tempSens;
+                
                 this.projectile.adjustedBC    = this.sm.AtmCorrect(this.projectile.bc, 0, air_pressure, temperature, 0.5 );
                 this.zeroInfo.zeroAngle = this.sm.ZeroAngle(bc_at_zero, this.zeroInfo.speed, this.scopeInfo.height / 25.4,  this.zeroInfo.range / 0.9144, this.zeroInfo.offset / 25.4);
 
@@ -412,7 +413,7 @@
                     0.0,
                     this.sm.RadtoDeg((this.scopeInfo.currentClick - this.zeroInfo.click)*this.scopeInfo.verClick / 1000) + this.zeroInfo.zeroAngle,
                     this.environment.windspeed / 0.44704,
-                    this.environment.winddirection * Math.PI / 180
+                    this.environment.winddirection
                 );
                 this.solution.maxpath        = res.maxpath * 0.0254; // in -> m
                 this.solution.maxpathrange   = res.maxpathrange * 0.9144; // yd -> m
@@ -420,16 +421,17 @@
                 this.solution.outerpathrange = res.outerpathrange * 0.9144; // yd -> m
                 this.solution.zeroAt         = res.zeroat;
                 for (k in this.solution.path) {
-                    var r    = this.solution.path[k].x;
+                    var r    = this.solution.path[k].x; // meters.
                     var type = this.solution.path[k].u;
-                    var oneClick = Math.tan(this.scopeInfo.verClick/1000) * r;
+                    var oneClick = Math.tan(this.scopeInfo.verClick/1000) * r ;
+                    // our path is in metric, so convert from imperial in the standard-model.
                     this.solution.path[k] = {
                         x : r,
-                        y : res.solutions[r].y,
+                        y : res.solutions[r].y, // mm 
                         c : res.solutions[r].y / oneClick,
                         z : res.solutions[r].z,
-                        v : res.solutions[r].v,
-                        e : this.projectile.weight * Math.pow(res.solutions[r].v, 2) / 450380.0, // foot lbs
+                        v : res.solutions[r].v, // leave in fps
+                        e : this.projectile.weight * Math.pow(res.solutions[r].v, 2) / 450380.0, // foot lbs as
                         t : res.solutions[r].t,
                         u : type
                     }

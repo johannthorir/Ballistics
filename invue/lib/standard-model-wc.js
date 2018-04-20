@@ -319,6 +319,8 @@ function StandardModel(maxRange,dragFunction) {
 
         var headwind  = HeadWind(WindSpeed, WindAngle);
         var crosswind = CrossWind(WindSpeed, WindAngle);
+        
+        console.log("Wind is :" + WindSpeed + " headwind: " + headwind + " crosswind " +  crosswind);
 
         var Gy = GRAVITY * Math.cos(DegtoRad((ShootingAngle + ZAngle)));
         var Gx = GRAVITY * Math.sin(DegtoRad((ShootingAngle + ZAngle)));
@@ -326,8 +328,8 @@ function StandardModel(maxRange,dragFunction) {
         var vx = Vi * Math.cos(DegtoRad(ShootingAngle + ZAngle));
         var vy = Vi * Math.sin(DegtoRad(ShootingAngle + ZAngle));
 
-        var x = 0;
-        var y = -SightHeight/12;
+        var x = 0; //  ft 
+        var y = -SightHeight/12; //  ft
 
         var meters = 0;
         var n = 0;
@@ -361,9 +363,9 @@ function StandardModel(maxRange,dragFunction) {
                 solution.vel_x = vx;                             // Velocity (x)
                 solution.vel_y = vy;                             // Velocity (y)
                 solution.x = n;
-                solution.y = path * 0.0254;
+                solution.y = path * 0.0254; // meters
                 solution.t = solution.time;
-                solution.z = solution.windage;
+                solution.z = solution.windage * 0.0254; // meters.
                 solution.v = vx; // horizontal velocity
                 
                 result.solutions[n] = solution;
