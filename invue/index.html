@@ -1,27 +1,32 @@
 <html>
 <head>
+
+	<meta charset="utf-8">
+	<meta name="author" content="Jóhann Þórir Jóhannssn">
+	<meta name="copyright" content="copyright (c) 2018 Jóhann Þórir Jóhannsson. All rights reserved.">
     <meta name="viewport" content="width=device-width,user-scalable=no">
     <style>
         body { font-family : sans-serif; margin : 0px;}
-        [v-cloak] { display:none; }        
+        [v-cloak] { display:none; }
         .noselect { user-select: none;  }
         #app { max-width : 800px; margin-left : auto; margin-right : auto; }
         div.scopecontainer { display : inline-block;  padding : 1ex; vertical-align : top;}
-        canvas.scope { background-image : url('assets/static.png'); }
+        canvas.scope { background-image : url('assets/static.png'); border : 1px solid #358;}
         button.adjust { border : 1px solid rgba(255,255,255,0.5); width : 180px; height : 30px; padding : 0px;}
         h1 { font-size : 140%; padding : 0.1ex 1ex ; margin : 0; color : white; background-color : #358; }
         h3 { font-size : 120%; cursor : pointer; background-color : #ddd; padding : 2 2 2 10; margin: 0px 00px 1px 0px; border-top : 1px solid rgba(0,0,0,0.1);}
         .field { display : inline-block; min-width : 340px; max-width : 380px; border-bottom : 1px solid rgba(0,0,0,0.1); padding : 3px;}
         .inputs { margin : 1ex; padding : 0 0 0 10; }
-        .inputs label { display : inline-block; width : 170px; height : 2.5ex;}      
-        .inputs  .number { width : 5em; text-align : right; }      
+        .inputs label { display : inline-block; width : 170px; height : 2.5ex;}
+        .inputs  .number { width : 5em; text-align : right; }
         table.solution { border-collapse : collapse; display:inline-block; vertical-align: top ; margin : 1ex; }
         table.solution td,th { padding-left : 0.4em; padding-right : 0.4em; column-width : 3.8em;}
         table.solution td {text-align : right; font-size : 90%; padding-right : 1em;}
-        table.solution tr.X { background : rgba(0,0,0,0.1); font-weight : bold; } 
-        table.solution tr.o { background : rgba(0,0,0,0.05);   }       
+        table.solution tr.X { background : rgba(0,0,0,0.1); font-weight : bold; }
+        table.solution tr.o { background : rgba(0,0,0,0.05);   }
     </style>
     <script src="lib/vue.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
     <script src="lib/standard-model-wc.js"></script>
 </head>
 
@@ -30,7 +35,7 @@
     <div id="app" v-cloak>
         <h1>{{ projectile.name }} zeroed at {{ zeroInfo.speed }} fps <small>({{projectile.adjustedSpeed.toFixed(0)}} fps)</small></h1>
 
-        <div style="display:block; vertical-align: top; min-width : 24em;">    
+        <div style="display:block; vertical-align: top; min-width : 24em;">
             <h3 v-on:click="projectile.show = !projectile.show">{{projectile.title}}<span v-if="!projectile.show"> ...</span></h3>
             <div class="inputs" v-if="projectile.show">
                 <div class="field"><label>Name</label><input type="text" v-model="projectile.name" size="20"></div>
@@ -54,40 +59,39 @@
                 <number-input v-model.number="environment.windspeed    " name="Wind speed       " :step="0.1" :precision="1" unit="m/s" @input="refresh()"></number-input>
                 <number-input v-model.number="environment.winddirection" name="Wind direction   " :step="1.0" :precision="0" unit="°"   @input="refresh()"></number-input>
                 <number-input v-model.number="environment.temperature  " name="Local temperature" :step="0.1" :precision="1" unit="°C"  @input="refresh()"></number-input>
-                <number-input v-model.number="environment.pressure     " name="Local pressure   " :step="1.0" :precision="0" unit="hPa" @input="refresh()"></number-input>        
+                <number-input v-model.number="environment.pressure     " name="Local pressure   " :step="1.0" :precision="0" unit="hPa" @input="refresh()"></number-input>
             </div>
 
             <h3 v-on:click="scopeInfo.show = !scopeInfo.show">{{scopeInfo.title}}<span v-if="!scopeInfo.show"> ...</span></h3>
             <div class="inputs" v-if="scopeInfo.show">
-                <number-input v-model.number="scopeInfo.currentClick"  name="Current Click" :step="1.0" :precision="0" unit=""         @input="refresh()"></number-input>
-                <number-input v-model.number="scopeInfo.height      "  name="Scope Height " :step="1.0" :precision="0" unit="mm"       @input="refresh()"></number-input>
-                <number-input v-model.number="scopeInfo.verClick    "  name="Vert. click  " :step="0.1" :precision="1" unit="mm/100m"  @input="refresh()"></number-input>
-                <number-input v-model.number="scopeInfo.horClick    "  name="Hor. click   " :step="0.1" :precision="1" unit="mm/100m"  @input="refresh()"></number-input>
+                <number-input v-model.number="scopeInfo.currentClick"  name="Current Click" :step="1.0"  :precision="0" unit=""      @input="refresh()"></number-input>
+                <number-input v-model.number="scopeInfo.height      "  name="Scope Height " :step="1.0"  :precision="0" unit="mm"    @input="refresh()"></number-input>
+                <number-input v-model.number="scopeInfo.verClick    "  name="Vert. click  " :step="0.001" :precision="3" unit="mrad"  @input="refresh()"></number-input>
+                <number-input v-model.number="scopeInfo.horClick    "  name="Hor. click   " :step="0.001" :precision="3" unit="mrad"  @input="refresh()"></number-input>
             </div>
 
-        </div>        
-        <div class="scopecontainer"> 
+        </div>
+        <div class="scopecontainer">
             <scope :zero-info="zeroInfo" :scope-info="scopeInfo" :solution="solution" @clickity="refresh()" ref="scope"></scope>
-            <button class="adjust" id="dn" v-on:mousedown="scopeInfo.currentClick--;refresh()">DOWN</button><button class="adjust" id="up" v-on:mousedown="scopeInfo.currentClick++;refresh()">UP</button>            
             <p align="center"><i>Current zero at {{solution.zeroAt.toFixed(1)}} m for click {{ scopeInfo.currentClick - zeroInfo.click }}</i><br>
                 <span>Pbr: {{ solution.maxpathrange.toFixed(1) }} m - <span v-if="!isNaN(solution.outerpathrange)">{{ solution.outerpathrange.toFixed(1)}} m</span><br>
                 Zone: <span v-if="!isNaN(solution.outerpath)">{{ ((solution.maxpath - solution.outerpath)*1000).toFixed(0)}} mm.</span></span>
             </p>
-            
+
         </div>
-        
+
             <table class="solution">
                 <tr><th>Range</th> <th>Path</th>  <th>Clicks</th> <th>Wind</th>  <th>Time</th></tr>
                 <tr><th>m</th>     <th>mm</th>    <th></th>       <th>mm</th>    <th>ms</th>  </tr>
                 <tr v-for="p in solution.path"  :class="p.u">
-                    <td>{{ p.x }}</td> 
-                    <td>{{ (p.y * 1000).toFixed(0) }}</td> 
-                    <td>{{ (-p.c).toFixed(1)  }}</td>   
+                    <td>{{ p.x }}</td>
+                    <td>{{ (p.y * 1000).toFixed(0) }}</td>
+                    <td>{{ (-p.c).toFixed(1)  }}</td>
                     <td>{{ (p.z * 1000).toFixed(0) }}</td>
                     <td>{{ (p.t * 1000).toFixed(0) }}</td>
                 </tr>
             </table>
-        
+
     </div>
 
 
@@ -96,31 +100,42 @@
     Vue.component('number-input', {
         props: ["name", "value", "step", "precision", "unit"],
         template: `
-            <div class="field"><label>{{ name }}</label><input 
-                    class="number" 
-                    type="text" 
-                    v-model="displayValue" 
-                    @keydown.up="inc" 
+            <div class="field"><label>{{ name }}</label><input
+                    class="number"
+                    type="text"
+                    v-model="displayValue"
+                    @blur="isActive = false"
+                    @focus="isActive = true"
+                    @keydown.up="inc"
                     @keydown.down="dec"/> {{ unit }}</div>`,
+        data : function() {
+        	return { isActive : false };
+        },
         methods : {
-            inc : function() {            
-                this.$emit('input', this.value + this.step);
+            inc : function() {
+				this.value += this.step;
+				this.changed();
             },
             dec : function() {
-                this.$emit('input', this.value - this.step);
-            }
+            	this.value -= this.step;
+            	this.changed();
+            },
+        	changed : _.debounce(function() { this.$emit('input', this.value); }, 100, { leading : true, maxWait : 500 })
         },
+
         computed: {
             displayValue: {
-                get: function() { return this.value.toFixed(this.precision); },
-                set: function(modifiedValue) {
-                    // Recalculate value after ignoring "$" and "," in user input
-                    var newValue = parseFloat(modifiedValue.replace(/[^\d\.]/g, ""))
-                    // Ensure that it is not NaN
-                    if(isNaN(newValue)) 
-                        newValue = 0
+                get: function() {
+                	if(this.isActive && this.value == 0)
+                		return "";
+                	return this.value.toFixed(this.precision);
+                },
+                set: _.debounce( function(modifiedValue) {
+                    var newValue = parseFloat(modifiedValue);
+                    if(isNaN(newValue))
+                        newValue = 0;
                     this.$emit('input', newValue);
-                }
+                }, 300, { leading : true, maxWait : 500 })
             }
         }
     });
@@ -128,32 +143,57 @@
 
     Vue.component('scope', {
         props    : [ "zeroInfo", "scopeInfo", "solution" ],
-        template : '<div><canvas class="scope" ref="canvas" width="360" height="360" @touchmove="touchmove" @touchstart="touchstart"></canvas><br/></div>',
+        template : '<div><canvas class="scope" ref="canvas" width="360" height="360" @mousemove="mmove" @mousedown="mdown" @mouseup="mup" @touchmove="touchmove" @touchstart="touchstart"></canvas><br/></div>',
         data : function() {
-            return { rotating : null  }
+            return { rotating : null, captured : false  }
         },
         beforeCreate : function() {
-            
+
         },
-        created : function() {            
+        created : function() {
             this.rotating = new Image();
-            this.rotating.src    = "assets/rotating.png";            
+            this.rotating.src    = "assets/rotating.png";
         },
         methods  : {
-            touchstart : function(event) {
-                if(event) event.preventDefault;
-                var t = event.targetTouches[0];
-                var r = event.srcElement.getBoundingClientRect();
-                var dx = (t.clientX - r.x) - this.scopeInfo.center.x;
-                var dy = (t.clientY - r.y) - this.scopeInfo.center.y;
-                this.scopeInfo.initial =  Math.atan2(dx, dy);
-                this.scopeInfo.accumulated = 0.0;                
+        	mmove : function(event) {
+        		if(event) event.preventDefault();
+           		if(!this.captured) return;
+        		this.move(event, event.target.getBoundingClientRect());
             },
+        	mdown : function(event) {
+        		if(event) event.preventDefault;
+        		this.captured = true;
+                if(event.target.setCapture)
+        		  event.target.setCapture();
+			 	this.start(event, event.target.getBoundingClientRect());
+
+  			},
+        	mup : function(event) {
+        		if(event) event.preventDefault;
+        		this.captured = false;
+        		if(document.releaseCapture)
+                    document.releaseCapture();
+        	},
+
+         	touchstart : function(event) {
+                if(event) event.preventDefault;
+   				this.start(event.targetTouches[0], event.srcElement.getBoundingClientRect());
+                           },
             touchmove : function(event) {
                 if(event) event.preventDefault();
-                var t = event.targetTouches[0];
-                var r = event.srcElement.getBoundingClientRect();
-                var dx = (t.clientX - r.x) - this.scopeInfo.center.x;
+            	this.move(event.targetTouches[0], event.srcElement.getBoundingClientRect());
+
+            },
+
+			start : function(t, r) {
+				var dx = (t.clientX - r.x) - this.scopeInfo.center.x;
+				var dy = (t.clientY - r.y) - this.scopeInfo.center.y;
+				this.scopeInfo.initial =  Math.atan2(dx, dy);
+				this.scopeInfo.accumulated = 0.0;
+			},
+
+			move : function(t, r) {
+			    var dx = (t.clientX - r.x) - this.scopeInfo.center.x;
                 var dy = (t.clientY - r.y) - this.scopeInfo.center.y;
                 var a = Math.atan2(dx,dy);
                 var da = (a - this.scopeInfo.initial);
@@ -164,15 +204,14 @@
                 var clicks = da * this.scopeInfo.clicksPrTurn / (2*Math.PI);
                 this.scopeInfo.accumulated += clicks;
                 if(Math.abs(this.scopeInfo.accumulated) > 1) {
-                    var c = Math.trunc(this.scopeInfo.accumulated);                
+                    var c = Math.trunc(this.scopeInfo.accumulated);
                     this.scopeInfo.accumulated -= c;
-                    this.scopeInfo.currentClick += c;                    
+                    this.scopeInfo.currentClick += c;
                     this.$emit('clickity');
                 }
-                
+
                 this.scopeInfo.initial = a;
             },
-
             // draws the scope click ring with solution overlaid.
             render : function() {
                 var canvasElement = this.$refs.canvas;
@@ -189,11 +228,11 @@
                 ctx.drawImage(this.rotating,-rot_x,-rot_y);
                 ctx.restore();
 
-                // draw the solution 
+                // draw the solution
                 ctx.fillStyle    = "rgb(255,225,0)";
                 ctx.textAlign    = "center";
                 ctx.textBaseline = "bottom";
-                
+
                 var radius = 131;
                 var ball = 5;
                 var minClick = undefined;
@@ -210,11 +249,11 @@
                         ctx.font = "14px Sans-Serif";
                         ball = 2.5;
                     }
-                
+
                     // var c =  this.zeroInfo.click - this.scopeInfo.click - this.solution.path[k].c;
                     var c = -this.solution.path[k].c;
                     minClick = (minClick == undefined ? c : (c < minClick ? c : minClick));
-                    
+
                     if(c - minClick >= this.scopeInfo.clicksPrTurn) {
                         radius = 144;
                         ctx.fillStyle = "rgb(255,125,0)";
@@ -225,37 +264,37 @@
 
                     if(u != 'z')
                         ctx.fillText(r, 0, -radius-6);
-                    else 
+                    else
                         ball = 2;
 
                     ctx.beginPath();
                     ctx.arc(0,-radius, ball,0,2*Math.PI, false);
-                    ctx.fill();                    
+                    ctx.fill();
                     ctx.restore();
                 }
 
                 // draw the current click.
-                ctx.font = "bold 18px sans-serif";                
+                ctx.font = "bold 18px sans-serif";
                 ctx.fillStyle = "rgb(240,240,255)";
-                ctx.textBaseline = "middle";                
+                ctx.textBaseline = "middle";
                 ctx.fillText(this.scopeInfo.currentClick - this.zeroInfo.click, rot_x, rot_y);
             }
         }
     });
 
-    
-    var data = {        
-        sm  : new StandardModel(1000, "G1"), // maximum range 1000m using "G1" ballistic model.                
+
+    var data = {
+        sm  : new StandardModel(1000, "G1"), // maximum range 1000m using "G1" ballistic model.
         projectile : {
             title         : "Projectile",
             show          : false,
             name          : "Nosler BT 95",
-            weight        : 95,   // grain. 
+            weight        : 95,   // grain.
             bc            : 0.379,    // G1 ballistic coefficient.
             tempSens      : 3.1,  // fps pr degree Celsius.
             adjustedSpeed : 3000,
             adjustedBC    : 0.379
-        },        
+        },
         zeroInfo  : {
             title       : "Zeroing conditions",
             show        : false,
@@ -273,10 +312,10 @@
             title    : "Scope setup",
             show     : false,
             height   : 44, // mm height above boreline.
-            verClick : 7.0, // mm pr click at 100m
-            horClick : 7.0, // mm pr click at 100m
+            verClick : 0.07, // mrad
+            horClick : 0.07, // mrad
             clicksPrTurn : 35,
-            image :  document.createElement("img"),            
+            image :  document.createElement("img"),
             currentClick : 0, // current click on the scope.
             accumulated : 0.0, // accumulated clicks
             center : {  x : 181, y : 179 } // pixel center of the canvas.
@@ -289,8 +328,8 @@
             windspeed     : 3.0, // ms.
             winddirection : 63, // degrees
             temperature   : 6.1, // °C
-            pressure      : 1025          
-        },        
+            pressure      : 1025
+        },
         // ballistic solution to the zero information.
         solution : {
             title : "Solution",
@@ -300,12 +339,12 @@
             maxpathrange   : 0,
             outerpath      : 0,
             outerpathrange : 0,
-            path : [ 
+            path : [
                 { x : 100, y : -0.032, c: 0, z : 0.015, v : 2762, t : 0.113, u : "X" },
                 { x : 125, y : -0.032, c: 0, z : 0.015, v : 2762, t : 0.113, u : "z" },
                 { x : 150, y : -0.077, c: 0, z : 0.034, v : 2628, t : 0.174, u : "o" },
                 { x : 175, y : -0.160, c: 0, z : 0.061, v : 2501, t : 0.238, u : "z" },
-                { x : 200, y : -0.160, c: 0, z : 0.061, v : 2501, t : 0.238, u : "X" },                
+                { x : 200, y : -0.160, c: 0, z : 0.061, v : 2501, t : 0.238, u : "X" },
                 { x : 225, y : -0.160, c: 0, z : 0.061, v : 2501, t : 0.238, u : "z" },
                 { x : 250, y : -0.285, c: 0, z : 0.098, v : 2380, t : 0.305, u : "o" },
                 { x : 275, y : -0.457, c: 0, z : 0.143, v : 2264, t : 0.376, u : "z" },
@@ -314,7 +353,7 @@
                 { x : 350, y : -0.680, c: 0, z : 0.199, v : 2154, t : 0.450, u : "o" },
                 { x : 375, y : -0.961, c: 0, z : 0.265, v : 2049, t : 0.528, u : "z" },
                 { x : 400, y : -0.961, c: 0, z : 0.265, v : 2049, t : 0.528, u : "X" },
-                { x : 425, y : -1.305, c: 0, z : 0.342, v : 1949, t : 0.610, u : "z" },                
+                { x : 425, y : -1.305, c: 0, z : 0.342, v : 1949, t : 0.610, u : "z" },
                 { x : 450, y : -1.305, c: 0, z : 0.342, v : 1949, t : 0.610, u : "o" },
                 { x : 475, y : -1.719, c: 0, z : 0.431, v : 1853, t : 0.697, u : "z" },
                 { x : 500, y : -1.719, c: 0, z : 0.431, v : 1853, t : 0.697, u : "X" },
@@ -324,15 +363,15 @@
 
 
 
-    var vm = new Vue({ 
-        el : '#app', 
+    var vm = new Vue({
+        el : '#app',
         data : data,
         mounted : function() {
-            // console.log("mounted")                    
-            this.scopeInfo.currentClick = this.zeroInfo.click;        
+            // console.log("mounted")
+            this.scopeInfo.currentClick = this.zeroInfo.click;
             this.refresh();
         },
-        
+
         methods : {
             increment : function($even, model) {
                 model += $event.currenTarget.getAttribute("step");
@@ -344,26 +383,35 @@
                 this.$refs.scope.render();
             },
 
-            solve : function() {                                 
+			bound : function(value, min, max) {
+				return Math.max(min, Math.min(value, max));
+			},
+            solve : function() {
+            	this.projectile.bc           = this.bound(this.projectile.bc, 0.1, 1.0);
+            	this.zeroInfo.speed          = this.bound(this.zeroInfo.speed, 500, 5000);
+				this.zeroInfo.pressure       = this.bound(this.zeroInfo.pressure,       910.0, 1100.0);
+                this.zeroInfo.temperature    = this.bound(this.zeroInfo.temperature,     -30.0, 50.0);
+                this.environment.temperature = this.bound(this.environment.temperature,  -30.0, 50.0);
+                this.environment.pressure    = this.bound(this.environment.pressure,    910.0, 1100.0);
                 // console.log("Solving...")
                 var  sighting_temperature  = this.sm.celsius_to_fahrenheit(this.zeroInfo.temperature);
-                var  sighting_pressure     = this.sm.hPa_to_inHg(this.zeroInfo.pressure   );
+                var  sighting_pressure     = this.sm.hPa_to_inHg(this.zeroInfo.pressure);
                 var  temperature           = this.sm.celsius_to_fahrenheit(this.environment.temperature);
-                var  air_pressure          = this.sm.hPa_to_inHg(this.environment.pressure);                                
+                var  air_pressure          = this.sm.hPa_to_inHg(this.environment.pressure);
                 var  bc_at_zero            = this.sm.AtmCorrect(this.projectile.bc, 0, sighting_pressure, sighting_temperature, 0.5 );
-                
+
                 this.projectile.adjustedSpeed  = this.zeroInfo.speed + (this.environment.temperature - this.zeroInfo.temperature)*this.projectile.tempSens;
                 this.projectile.adjustedBC    = this.sm.AtmCorrect(this.projectile.bc, 0, air_pressure, temperature, 0.5 );
                 this.zeroInfo.zeroAngle = this.sm.ZeroAngle(bc_at_zero, this.zeroInfo.speed, this.scopeInfo.height / 25.4,  this.zeroInfo.range / 0.9144, this.zeroInfo.offset / 25.4);
-               
-                var res = this.sm.SolveAll(                    
-                    this.projectile.adjustedBC, 
-                    this.projectile.weight, 
+
+                var res = this.sm.SolveAll(
+                    this.projectile.adjustedBC,
+                    this.projectile.weight,
                     this.projectile.adjustedSpeed,
-                    this.scopeInfo.height / 25.4, 
-                    0.0, 
-                    this.sm.RadtoDeg((this.scopeInfo.currentClick - this.zeroInfo.click)*Math.atan2(this.scopeInfo.verClick, 100000)) + this.zeroInfo.zeroAngle, 
-                    this.environment.windspeed / 0.44704, 
+                    this.scopeInfo.height / 25.4,
+                    0.0,
+                    this.sm.RadtoDeg((this.scopeInfo.currentClick - this.zeroInfo.click)*this.scopeInfo.verClick / 1000) + this.zeroInfo.zeroAngle,
+                    this.environment.windspeed / 0.44704,
                     this.environment.winddirection * Math.PI / 180
                 );
                 this.solution.maxpath        = res.maxpath * 0.0254; // in -> m
@@ -374,7 +422,7 @@
                 for (k in this.solution.path) {
                     var r    = this.solution.path[k].x;
                     var type = this.solution.path[k].u;
-                    var oneClick = this.scopeInfo.verClick * r / 100000;
+                    var oneClick = Math.tan(this.scopeInfo.verClick/1000) * r;
                     this.solution.path[k] = {
                         x : r,
                         y : res.solutions[r].y,
@@ -386,11 +434,11 @@
                         u : type
                     }
                 }
-              
+
             }
         }
     });
-   
+
 </script>
 </body>
 </html>
