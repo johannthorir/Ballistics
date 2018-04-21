@@ -46,8 +46,7 @@
 	td.number { padding-right : 1ex;  padding-left : 0px; text-align : right;}
 	.number input { text-align : right; width : 48px;}
 
-	@media screen {
-		#inputform {  }
+	@media screen {		 
 		.info { font-style : italic; color : #999; font-size : 90% }
 	}
 	@media print {
@@ -99,7 +98,7 @@ function main()
     var clicksize =  parseFloat(document.getElementById('cs').value); // one click at 100 m
 
 	var baro = parseFloat(document.getElementById('baro').value); // hPa
-	var temp = parseFloat(document.getElementById('temp').value); // °C
+	var temp = parseFloat(document.getElementById('temp').value); // ï¿½C
     var humd = parseFloat(document.getElementById('humd').value)/100; // relative.
 
 	if(isNaN(clicksize))
@@ -195,7 +194,7 @@ function main()
 
 	output +=
 	'<div class="results"><div class="header row"><div class="col range">Fjarl.</div>' +
-	'<div class="col speed">Hraði</div>'  +
+	'<div class="col speed">Hraï¿½i</div>'  +
 	'<div class="col energy">Orka</div>' +
 	'<div class="col path">Ferill</div>' +
 	'<div class="col clicks">(clicks)</div>'+
@@ -204,7 +203,7 @@ function main()
 	'<div class="col windage">&harr;</div>' +
 	'<div class="col windeflect">Fok</div>' +
 	'<div class="col windeflect">&varr;</div>' +
-	'<div class="col time">Tími</div>' +
+	'<div class="col time">Tï¿½mi</div>' +
 	'</div>';
 
     for (s=25;s<=maxrange;s+=25)
@@ -587,22 +586,22 @@ Nosler 100gr Partition : 0.384<br/>
 <div id="inputform">
 	<table cellspacing="0">
 	<tr><td><select id="md" onchange="redraw()"><option value="1" selected>G1</option><option value="7">G7</option></select> BC:</td><td class="number" ><input onkeyup="redraw();" type="text" value="0.379" id="bc" /></td></tr>
-	<tr><td>Hraði við hlaupenda </td><td class="number" >
+	<tr><td>Hraï¿½i viï¿½ hlaupenda </td><td class="number" >
 	<input onkeyup="redraw();" onkeydown="spin(event,5,0)" type="text" value="2990"  id="mv"  /> +/-
 	<input onkeyup="redraw();" onkeydown="spin(event,1,0)" type="text" value="25"  id="mvdiff" style="width:3ex;"  />
 	</td><td>fps</td></tr>
-	<tr><td>Þyngd</td><td class="number" ><input onkeyup="redraw();" onkeydown="spin(event,5,0)"  type="text" value="100"   id="bw"  /></td><td>gr</td></tr>
-	<tr><td>Núllfjarlægð</td><td class="number" ><input onkeyup="redraw();" onkeydown="spin(event,5,0)" type="text" value="100"   id="zr"  /></td><td>m</td></tr>
-	<tr><td>Núllákoma</td><td class="number" ><input onkeyup="redraw();" onkeydown="spinall(event, 1, 0)" type="text" value="0" id="zh" /></td><td>mm</td></tr>
-	<tr><td>Kíkisklikk</td><td class="number" ><input onkeyup="redraw();" type="text" value="7.0" id="cs" /></td><td>mm @ 100m</td></tr>
+	<tr><td>ï¿½yngd</td><td class="number" ><input onkeyup="redraw();" onkeydown="spin(event,5,0)"  type="text" value="100"   id="bw"  /></td><td>gr</td></tr>
+	<tr><td>Nï¿½llfjarlï¿½gï¿½</td><td class="number" ><input onkeyup="redraw();" onkeydown="spin(event,5,0)" type="text" value="100"   id="zr"  /></td><td>m</td></tr>
+	<tr><td>Nï¿½llï¿½koma</td><td class="number" ><input onkeyup="redraw();" onkeydown="spinall(event, 1, 0)" type="text" value="0" id="zh" /></td><td>mm</td></tr>
+	<tr><td>Kï¿½kisklikk</td><td class="number" ><input onkeyup="redraw();" type="text" value="7.0" id="cs" /></td><td>mm @ 100m</td></tr>
 	<tr><td><input type="checkbox" id="useza" onclick="redraw();"/>Horn:</td><td class="number"><input onkeyup="redraw();" onkeydown="moaspin(event)" type="text" value="3.97" id="za"/></td><td>MOA</td></tr>
-	<tr><td>Kíkismiðja frá hlaupmiðju</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 1,0)" type="text" value="47" id="sh" /></td><td>mm</td></tr>
-	<tr><td>Vindhraði þvert</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 1,0)" type="text" value="5" id="ws"></td><td>m/s</td></tr>
-	<tr><td>Reikna út í</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 50, 0)" type="text" value="300" id="mr"></td><td>m</td></tr>
-	<tr><td>Núllklikk</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 1, 0)" type="text" value="7" id="co"></td><td>klikk</td></tr>
-	<tr><td><input type="checkbox" id="useweather" onclick="redraw();"/> Leiðrétta fyrir veðurskilyrði</td><td></td></tr>
-	<tr><td>Loftþrýstingur á stað:</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 1,0)" type="text" value="1015" id="baro"></td><td>hPa</td></tr>
-	<tr><td>Hitastic:</td><td class="number"><input onkeyup="redraw();" onkeydown="spinTemp(event)" type="text" value="10" id="temp"></td><td>°C</td></tr>
+	<tr><td>Kï¿½kismiï¿½ja frï¿½ hlaupmiï¿½ju</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 1,0)" type="text" value="47" id="sh" /></td><td>mm</td></tr>
+	<tr><td>Vindhraï¿½i ï¿½vert</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 1,0)" type="text" value="5" id="ws"></td><td>m/s</td></tr>
+	<tr><td>Reikna ï¿½t ï¿½</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 50, 0)" type="text" value="300" id="mr"></td><td>m</td></tr>
+	<tr><td>Nï¿½llklikk</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 1, 0)" type="text" value="7" id="co"></td><td>klikk</td></tr>
+	<tr><td><input type="checkbox" id="useweather" onclick="redraw();"/> Leiï¿½rï¿½tta fyrir veï¿½urskilyrï¿½i</td><td></td></tr>
+	<tr><td>Loftï¿½rï¿½stingur ï¿½ staï¿½:</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 1,0)" type="text" value="1015" id="baro"></td><td>hPa</td></tr>
+	<tr><td>Hitastic:</td><td class="number"><input onkeyup="redraw();" onkeydown="spinTemp(event)" type="text" value="10" id="temp"></td><td>ï¿½C</td></tr>
 	<tr><td>Loftraki</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 1,0)" type="text" value="50" id="humd"></td><td>%</td></tr>
 	</table>
 </div>
