@@ -20,7 +20,7 @@
         .inputs label { display : inline-block; width : 170px; height : 2.5ex;}
         .inputs  .number { width : 5em; text-align : right; }
         table.solution { border-collapse : collapse; display:inline-block; vertical-align: top ; margin : 1ex; }
-        table.solution td,th { padding-left : 0.4em; padding-right : 0.4em; column-width : 3.8em;}
+        table.solution td,th { padding-left : 0.4em; padding-right : 0.4em; column-width : 3.0em;}
         table.solution td {text-align : right; font-size : 90%; padding-right : 1em;}
         table.solution tr.X { background : rgba(0,0,0,0.1); font-weight : bold; }
         table.solution tr.o { background : rgba(0,0,0,0.05);   }
@@ -35,7 +35,7 @@
     <div id="app" v-cloak>
         <h1>{{ projectile.name }} zeroed at {{ zeroInfo.speed }} fps <small>({{projectile.adjustedSpeed.toFixed(0)}} fps)</small></h1>
 
-        <div style="display:block; vertical-align: top; min-width : 24em;">
+        <div style="display:block;  min-width : 24em;">
             <h3 v-on:click="projectile.show = !projectile.show">{{projectile.title}}<span v-if="!projectile.show"> ...</span></h3>
             <div class="inputs" v-if="projectile.show">
                 <div class="field"><label>Name</label><input type="text" v-model="projectile.name" size="20"></div>
@@ -81,10 +81,11 @@
         </div>
 
             <table class="solution">
-                <tr><th>Range</th> <th>Path</th>  <th>Clicks</th> <th>Wind</th>  <th>Time</th></tr>
-                <tr><th>m</th>     <th>mm</th>    <th></th>       <th>mm</th>    <th>ms</th>  </tr>
+                <tr><th>Range</th> <th>Speed</th><th>Path</th>  <th>Clicks</th> <th>Wind</th>  <th>Time</th></tr>
+                <tr><th>m</th>     <th>fps</th><th>mm</th>    <th></th>       <th>mm</th>    <th>ms</th>  </tr>
                 <tr v-for="p in solution.path"  :class="p.u">
                     <td>{{ p.x }}</td>
+                    <td>{{ p.v.toFixed(0) }}</td>
                     <td>{{ (p.y * 1000).toFixed(0) }}</td>
                     <td>{{ (-p.c).toFixed(1)  }}</td>
                     <td>{{ (p.z * 1000).toFixed(0) }}</td>
