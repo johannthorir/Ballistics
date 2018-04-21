@@ -125,11 +125,11 @@
         computed: {
             displayValue: {
                 get: function() {
-                    console.log("getting")
+                    // console.log("getting")
                 	return parseFloat(this.value.toFixed(this.precision));
                 },
                 set: function(modifiedValue) {
-                    console.log(modifiedValue)
+                    // console.log(modifiedValue)
                     var newValue = parseFloat(modifiedValue);
                     if(isNaN(newValue))
                         newValue = 0;                   
@@ -327,8 +327,8 @@
             show : false,
             windspeed     : 3.0, // ms.
             winddirection : 63, // degrees
-            temperature   : 6.1, // °C
-            pressure      : 1025
+            temperature   : -1, // °C
+            pressure      : 1017
         },
         // ballistic solution to the zero information.
         solution : {
@@ -389,7 +389,8 @@
             },
             // this should not modify....
             solve : function() {
-            	var projectile_bc           = this.bound(this.projectile.bc, 0.1, 1.0);
+                var projectile_bc           = this.bound(this.projectile.bc, 0.1, 1.0);
+                var zeroInfo_range          = this.bound(this.zeroInfo.range, 50,1000);
             	var zeroInfo_speed          = this.bound(this.zeroInfo.speed, 500, 5000);
 				var zeroInfo_pressure       = this.bound(this.zeroInfo.pressure,       910.0, 1100.0);
                 var zeroInfo_temperature    = this.bound(this.zeroInfo.temperature,     -30.0, 50.0);
@@ -404,8 +405,15 @@
 
                 this.projectile.adjustedSpeed  = zeroInfo_speed + (environment_temperature - zeroInfo_temperature)*this.projectile.tempSens;
                 this.projectile.adjustedBC    = this.sm.AtmCorrect(projectile_bc, 0, air_pressure, temperature, 0.5 );
-                this.zeroInfo.zeroAngle = this.sm.ZeroAngle(bc_at_zero, zeroInfo_speed, this.scopeInfo.height / 25.4,  this.zeroInfo.range / 0.9144, this.zeroInfo.offset / 25.4);
-
+                this.zeroInfo.zeroAngle = this.sm.ZeroAngle(
+                    bc_at_zero, 
+                    zeroInfo_speed, 
+                    this.scopeInfo.height / 25.4,  
+                    zeroInfo_range / 0.9144, 
+                    this.zeroInfo.offset / 25.4
+                );
+                // console.log("zero bc: " + bc_at_zero + " adjustedBC: " + this.projectile.adjustedBC)
+                // console.log("zero speed: " + zeroInfo_speed + " adjustedSpeed:"  + this.projectile.adjustedSpeed)
                 var res = this.sm.SolveAll(
                     this.projectile.adjustedBC,
                     this.projectile.weight,

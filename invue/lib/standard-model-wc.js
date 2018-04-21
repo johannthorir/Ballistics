@@ -168,6 +168,22 @@ function StandardModel(maxRange,dragFunction) {
     function HeadWind(WindSpeed, WindAngle)  { return (Math.cos(DegtoRad(WindAngle)) * WindSpeed); }
     function CrossWind(WindSpeed, WindAngle) { return (Math.sin(DegtoRad(WindAngle)) * WindSpeed); }
     function ZeroAngle(DragCoefficient, Vi, SightHeight, ZeroRange, yIntercept) {
+        var angle = DegtoRad(45);
+        var step = angle/2;
+        var minstep = MOAtoRad(0.001);
+        while(true) {
+            var drop = DropAtZeroAngled(DragCoefficient, Vi, SightHeight, ZeroRange, angle - step);
+            // console.log("angle: " + RadtoDeg(angle) + " drop " + drop)
+            if(drop > yIntercept) 
+                angle = angle - step;
+            step = step / 2;
+            if(step < minstep || Math.abs(drop - yIntercept) < 0.001)
+                break;
+        }
+        return angle;
+    }
+   
+    function ZeroAngle2(DragCoefficient, Vi, SightHeight, ZeroRange, yIntercept) {
         var iterations = 0;
         // Numerical Integration variables
         var t = 0;
@@ -185,12 +201,14 @@ function StandardModel(maxRange,dragFunction) {
         var dvy = 0;
         var Gx  = 0;
         var Gy  = 0;
-
+        console.log("Range is " + ZeroRange + " Target intercept is " + yIntercept);
         // just use a riflemans rule for zerorange less than 600 yards
-        if(ZeroRange < 600)
-        	return RadtoDeg(Math.atan((yIntercept - DropAtZero(DragCoefficient, Vi, SightHeight, ZeroRange))/(ZeroRange*36)));
+        var angle = Math.atan((yIntercept - DropAtZero(DragCoefficient, Vi, SightHeight, ZeroRange))/(ZeroRange*36));
+        console.log("riflemans angle : " + angle);
+        if(ZeroRange < 100)
+        	return RadtoDeg(angle);
 
-        var angle = DegtoRad(16); // Math.atan((-DropAtZero(DragFunction, DragCoefficient, Vi, SightHeight, ZeroRange))/(ZeroRange*36));
+        var angle = DegtoRad(5); // Math.atan((-DropAtZero(DragFunction, DragCoefficient, Vi, SightHeight, ZeroRange))/(ZeroRange*36));
         // var minchange = MOAtoRad(0.01);
 
         var drag = DF(dragFunction);
@@ -211,7 +229,7 @@ function StandardModel(maxRange,dragFunction) {
 
             // track x (feet) out to zeroRange (yards) or until we cross sightline...,
             for (t=0; x < (ZeroRange*3); t = t+dt) {
-                iterations++;
+                
                 vy1 = vy;
                 vx1 = vx;
                 v = Math.pow((Math.pow(vx,2)+Math.pow(vy,2)),0.5);
@@ -227,15 +245,16 @@ function StandardModel(maxRange,dragFunction) {
 
                 x = x + dt * (vx + vx1)/2;
                 y = y + dt * (vy + vy1)/2;
-
                 if(vy < 0 && y < yIntercept)
                     break;
-            }
+                }
+            
+            iterations++;
 
             // now if impact is higher than sight height + yintercept then we need to reduce the angle
+            console.log("iteration: " + iterations, "intercept is at " + y + " angle is " + angle)
             if(y > yIntercept)
                 angle -= da;
-            // if it is lower, then increase.
             else
                 angle += da;
 
@@ -246,8 +265,7 @@ function StandardModel(maxRange,dragFunction) {
             if(Math.abs(y-yIntercept) < mindiff)
                 found = true;
 
-            if (da < minchange)
-                found = true;
+            if (da < minchange)     found = true;
 
         }
 
@@ -399,6 +417,40 @@ function StandardModel(maxRange,dragFunction) {
         return result;
     }
 
+    function DropAtZeroAngled(DragCoefficient, Vi, SightHeight, ZeroRange, Angle) {
+        var dt = 0.25/Vi;
+
+        var Gy = GRAVITY * Math.cos(DegtoRad(Angle));
+        var Gx = GRAVITY * Math.sin(DegtoRad(Angle));
+
+        var vx = Vi * Math.cos(DegtoRad(Angle));
+        var vy = Vi * Math.sin(DegtoRad(Angle));
+
+        var x = 0;
+        var y = -SightHeight/12;
+        var drag = DF(dragFunction);
+       
+        // track x (feet) out to zeroRange (yards) 
+        for (t=0; x < (ZeroRange*3); t = t+dt) {
+            
+            vy1 = vy;
+            vx1 = vx;
+            v = Math.pow((Math.pow(vx,2)+Math.pow(vy,2)),0.5);
+            dt = 0.25/v;
+
+            // dv = retard(DragFunction, DragCoefficient, v);
+            dv = drag(v) / DragCoefficient;
+            dvy = -dv * vy/v;
+            dvx = -dv * vx/v;
+
+            vx = vx + dt * (dvx + Gx);
+            vy = vy + dt * (dvy + Gy);
+
+            x = x + dt * (vx + vx1)/2;
+            y = y + dt * (vy + vy1)/2;
+        }
+        return y * 12; // inches
+    }
 
     // this is only used to base a riflemans rule estimate of the zero angle.
     // note that this is inaccurate for very slow bullets or extreme ranges, but
