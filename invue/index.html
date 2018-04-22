@@ -46,7 +46,7 @@
 
             <h3 v-on:click="zeroInfo.show = !zeroInfo.show">{{zeroInfo.title}}<span v-if="!zeroInfo.show"> ...</span></h3>
             <div class="inputs" v-if="zeroInfo.show">
-                <number-input v-model.number="zeroInfo.speed"       name="Speed"       :step="1"   :precision="0" unit="ft/s"  @input="refresh()"></number-input>
+                <number-input v-model.number="zeroInfo.speed"       name="Speed"       :step="1"   :precision="0" unit="ft/s"  @input   ="refresh()"></number-input>
                 <number-input v-model.number="zeroInfo.range"       name="Range"       :step="10"  :precision="0" unit="m"     @input="refresh()"></number-input>
                 <number-input v-model.number="zeroInfo.offset"      name="Offset"      :step="1"   :precision="0" unit="mm"    @input="refresh()"></number-input>
                 <number-input v-model.number="zeroInfo.click"       name="Click"       :step="1"   :precision="0" unit=""      @input="refresh()"></number-input>
@@ -113,13 +113,13 @@
         	return { isActive : false };
         },
         methods : {
-            inc : function() {
+            inc : function(){
                 this.$emit('input', this.value + this.step);				
             },
             dec : function() {
             	this.$emit('input', this.value - this.step);				
             },
-        	changed : _.debounce(function() { this.$emit('input', parseFloat(this.value.toFixed(this.precision))); }, 100, { leading : true, maxWait : 500 })
+        	changed : _.debounce(function(){ this.$emit('input', parseFloat(this.value.toFixed(this.precision))); }, 100, { leading : true, maxWait : 500 })
         },
 
         computed: {
