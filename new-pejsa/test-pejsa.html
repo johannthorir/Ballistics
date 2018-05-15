@@ -1,0 +1,52 @@
+<html>
+<head>
+<script src="new-pejsa.js"></script>
+<style>
+.speed, .small-distance { text-align : right; }
+.speed:after { content : " m/s"; }
+.small-distance:after { content : " mm"; }
+</style>
+</head>
+<body>
+	<table>
+		<tr><td>Velocity</td><td class="speed" id="velocity"></td></tr>
+		<tr><td>Drop at range</td><td class="small-distance" id="drop"></td></tr>
+		<tr><td>Path at range</td><td class="small-distance" id="path"></td></tr>
+	</table>	
+</div>
+
+<script defer>
+	var bc          = 0.430;  // G1
+	var formFactor  = 0.5;    // boat tail
+	var temperature = 15;     // degrees C
+	var pressure    = 1013.25 // hPa
+	var humidity    = 0.5;    // 50% relative
+	var altitude    = 0;      // sea level.
+	var sightHeight = 44;     // mm
+	var v0 = 957.0; // m/s
+
+	var range       = 500.0; // m
+	var zeroRange   = 250.0; //
+
+	
+	// to use the pejsa formulations we need the drag factor and adjusted drag factor.
+
+
+	v0          /= 0.3048;
+	range       /= 0.9144;
+	zeroRange   /= 0.9144;
+	sightHeight /= 25.4;
+
+	var F0 = pejsa.getF0byBC(v0, bc);
+	
+	var velocity = pejsa.getVelocity(v0, F0, formFactor, range) * 0.3048;
+	var drop     = pejsa.getDrop(v0, F0, formFactor, range) * 25.4; 
+    var path     = pejsa.getFlightPath(v0, F0, formFactor, range, sightHeight, zeroRange) * 25.4;
+   
+    document.getElementById('velocity').innerText = velocity.toFixed(1);
+	document.getElementById('drop').innerText = drop.toFixed(1);
+	document.getElementById('path').innerText = path.toFixed(1);
+</script>
+</body>
+</html>
+
