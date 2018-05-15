@@ -14,7 +14,10 @@
         canvas.scope { background-image : url('assets/static.png'); border : 1px solid #358;}
         button.adjust { border : 1px solid rgba(255,255,255,0.5); width : 180px; height : 30px; padding : 0px;}
         h1 { font-size : 140%; padding : 0.1ex 1ex ; margin : 0; color : white; background-color : #358; }
-        h3 { font-size : 120%; cursor : pointer; background-color : #ddd; padding : 2 2 2 10; margin: 0px 00px 1px 0px; border-top : 1px solid rgba(0,0,0,0.1);}
+        h3 { vertical-align:center; color: white; font-size : 120%; cursor : pointer; background-color : #ddd; padding : 2 2 2 10; margin: 0px 00px 1px 0px; border-top : 1px solid rgba(0,0,0,0.1);}
+        h3:before { content:url('assets/rightarrow.svg'); margin-right : 2px;}
+        h3.active:before { content:url('assets/downarrow.svg'); margin-right : 2px;}
+        
         .field { display : inline-block; min-width : 340px; max-width : 380px; border-bottom : 1px solid rgba(0,0,0,0.1); padding : 3px;}
         .inputs { margin : 1ex; padding : 0 0 0 10; }
         .inputs label { display : inline-block; width : 170px; height : 2.5ex;}
@@ -36,15 +39,16 @@
         <h1>{{ projectile.name }} zeroed at {{ zeroInfo.speed }} fps <small>({{projectile.adjustedSpeed.toFixed(0)}} fps)</small></h1>
 
         <div style="display:block;  min-width : 24em;">
-            <h3 v-on:click="projectile.show = !projectile.show">{{projectile.title}}<span v-if="!projectile.show"> ...</span></h3>
+            <h3 v-on:click="projectile.show = !projectile.show" v-bind:class="{ active : projectile.show}">{{projectile.title}}</h3>
             <div class="inputs" v-if="projectile.show">
                 <div class="field"><label>Name</label><input type="text" v-model="projectile.name" size="20"></div>
                 <number-input v-model.number="projectile.weight"   name="Bullet Weight"  :step="1.000" :precision="0" unit="gr"     @input="refresh()"></number-input>
                 <number-input v-model.number="projectile.bc"       name="G1 BC        "  :step="0.001" :precision="3" unit=""       @input="refresh()"></number-input>
                 <number-input v-model.number="projectile.tempSens" name="Temp. sens.  "  :step="0.100" :precision="1" unit="ft/s°C" @input="refresh()"></number-input>
+                <alternate-input v-model.number="projectile.tempSens" name="Temp snes. "  v-bind:index.sync="dummyIndex" @input="refresh()"></alternate-input>
             </div>
 
-            <h3 v-on:click="zeroInfo.show = !zeroInfo.show">{{zeroInfo.title}}<span v-if="!zeroInfo.show"> ...</span></h3>
+            <h3 v-on:click="zeroInfo.show = !zeroInfo.show" v-bind:class="{ active: zeroInfo.show}">{{zeroInfo.title}}</h3>
             <div class="inputs" v-if="zeroInfo.show">
                 <number-input v-model.number="zeroInfo.speed"       name="Speed"       :step="1"   :precision="0" unit="ft/s"  @input="refresh()"></number-input>
                 <number-input v-model.number="zeroInfo.range"       name="Range"       :step="10"  :precision="0" unit="m"     @input="refresh()"></number-input>
@@ -54,7 +58,7 @@
                 <number-input v-model.number="zeroInfo.pressure"    name="Pressure"    :step="1"   :precision="0" unit="hPA"   @input="refresh()"></number-input>
             </div>
 
-            <h3 v-on:click="environment.show = !environment.show">{{environment.title}}<span v-if="!environment.show"> ...</span></h3>
+            <h3 v-on:click="environment.show = !environment.show" v-bind:class="{ active: environment.show}">{{environment.title}}<span v-if="!environment.show"> ...</span></h3>
             <div class="inputs" v-if="environment.show">
                 <number-input v-model.number="environment.windspeed    " name="Wind speed       " :step="0.1" :precision="1" unit="m/s" @input="refresh()"></number-input>
                 <number-input v-model.number="environment.winddirection" name="Wind direction   " :step="1.0" :precision="0" unit="°"   @input="refresh()"></number-input>
@@ -62,7 +66,7 @@
                 <number-input v-model.number="environment.pressure     " name="Local pressure   " :step="1.0" :precision="0" unit="hPa" @input="refresh()"></number-input>
             </div>
 
-            <h3 v-on:click="scopeInfo.show = !scopeInfo.show">{{scopeInfo.title}}<span v-if="!scopeInfo.show"> ...</span></h3>
+            <h3 v-on:click="scopeInfo.show = !scopeInfo.show" v-bind:class="{ active: scopeInfo.show}">{{scopeInfo.title}}<span v-if="!scopeInfo.show"> ...</span></h3>
             <div class="inputs" v-if="scopeInfo.show">
                 <number-input v-model.number="scopeInfo.currentClick"  name="Current Click" :step="1.0"  :precision="0" unit=""      @input="refresh()"></number-input>
                 <number-input v-model.number="scopeInfo.height      "  name="Scope Height " :step="1.0"  :precision="0" unit="mm"    @input="refresh()"></number-input>
@@ -99,7 +103,7 @@
 <script>
 
     Vue.component('number-input', {
-        props: ["name", "value", "step", "precision", "unit"],
+        props: ["name", "value",  "step", "precision", "unit"],
         template: `
             <div class="field"><label>{{ name }}</label><input
                     class="number"
@@ -136,6 +140,63 @@
                     if(isNaN(newValue))
                         newValue = 0;                   
                    this.$emit('input', newValue);
+                }
+            }
+        }
+    });
+
+
+    Vue.component('alternate-input',{
+        props: {
+
+            name: String, 
+            value: Number,  
+            index: Number,       
+            units : {
+                type: Array,
+                default : function() { return [ 
+                    { unit: "°C",       step: 0.1,   precision: 1, a: 0,  b: 1                 },
+                    { unit: "°F",       step: 0.1,   precision: 1, a: 32, b: 1.8               }
+                ]}
+            } 
+        },  
+        created() {
+            console.log(`alternate-input created this.index is ${this.index}`);
+            this.unitIndex = this.index;
+        },
+        data() {
+            return { unitIndex : 0 }
+        },
+        template: ` 
+           <div class="field"><span class="label" @click="toggleUnits">{{ name }}</span><input
+            class="number"
+            type="text"
+            v-model="displayValue"
+            @blur="isActive = false;"
+            @focus="isActive = true"
+            @keydown.up="inc"
+            @keydown.down="dec"/> <span class="unit" @click="toggleUnits"> {{ unitString }} </span></div>
+
+        `,
+        methods : {
+            inc(){this.$emit('input', this.value + this.toBase(this.units[this.unitIndex].step))},
+            dec() { this.$emit('input', this.value - this.toBase(this.units[this.unitIndex].step))},
+            toBase(value) { return ( value - this.units[this.unitIndex].a) / this.units[this.unitIndex].b},
+            toDisplay(value) { return this.units[this.unitIndex].a + value * this.units[this.unitIndex].b},
+            changed() { this.$emit('input', parseFloat(this.value.toFixed(this.units[0].precision)))},
+            toggleUnits() { this.$emit('update:index', this.unitIndex = (this.unitIndex + 1) % this.units.length)}
+        },
+        computed: {
+            unitString: { get() {       return this.units[this.unitIndex].unit; } },
+            displayValue: {
+                get() {
+                    return parseFloat(this.toDisplay(this.value).toFixed(this.units[this.unitIndex].precision));
+                },
+                set(modifiedValue) {
+                    var newValue = this.toBase(parseFloat(modifiedValue));
+                    if(isNaN(newValue))
+                        newValue = 0;       
+                    this.$emit('input', newValue);
                 }
             }
         }
@@ -286,6 +347,7 @@
 
 
     var data = {
+        dummyIndex : 0,
         sm  : new StandardModel(1000, "G1"), // maximum range 1000m using "G1" ballistic model.
         projectile : {
             title         : "Projectile",
@@ -376,7 +438,7 @@
         },
 
         methods : {
-            increment : function($even, model) {
+            increment : function($event, model) {
                 model += $event.currenTarget.getAttribute("step");
             },
 
@@ -431,7 +493,7 @@
                 this.solution.outerpath      = res.outerpath * 0.0254; // in -> m
                 this.solution.outerpathrange = res.outerpathrange * 0.9144; // yd -> m
                 this.solution.zeroAt         = res.zeroat;
-                for (k in this.solution.path) {
+                for (let k in this.solution.path) {
                     var r    = this.solution.path[k].x; // meters.
                     var type = this.solution.path[k].u;
                     var oneClick = Math.tan(this.scopeInfo.verClick/1000) * r ;
