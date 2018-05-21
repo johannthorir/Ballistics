@@ -63,6 +63,72 @@ function getCD(mach, CDTable) {
 }
 
 
+function decideConvert(height, pressure)
+{
+    var altpressure, F1, F2, F3, F;		
+    var F1 = (Math.pow(1013.25, 0.190284) * 0.0065)/288.15;
+    var F2 = Mheight/Math.pow((MBpressure - 0.3), 0.190284);
+    var F3 = 1/0.190284;
+    var F = Math.pow((1 + (F1 * F2)), F3);
+    var altpressure = (MBpressure - 0.3) * F
+    return altpressure;
+}
+    
+function convertinHGtomb(inHG)
+{
+    var mb;
+    mb = 33.8639*inHG;
+    return mb;
+}
+
+            
+function convertmbtoinHG(mb)
+{
+    var inHG;
+    inHG = 0.0295300*mb;
+    return inHG;
+}
+
+function convertmbtommHG(mb)
+{
+    var mmHG;
+    mmHG = 0.750062*mb;
+    return mmHG;
+}
+function convertmmHGtomb(mmHG)
+{
+    var mb;
+    mb = 1.333224*mmHG;
+    return mb;
+}
+
+
+function convertfeettometer(feet)
+{
+    var meter;
+    meter = 0.3048 * feet;
+    return meter;
+}
+
+function roundOff(value)
+{
+    value = Math.round(100*value)/100;
+    return value;
+}
+
+function setToNull()
+{
+    document.Convert.AltimeterSettinginHG.value="";
+    document.Convert.AltimeterSettingmmHG.value="";
+    document.Convert.AltimeterSettingmb.value="";
+    document.Convert.StnPress.value="";
+    document.Convert.Height.value="";
+}
+
+
+
+
+
 var pejsa = {
 
      pressureCorrection: function(temperature, height, pressure) {
