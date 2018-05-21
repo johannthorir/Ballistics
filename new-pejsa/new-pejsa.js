@@ -63,7 +63,113 @@ function getCD(mach, CDTable) {
 }
 
 
+function decideConvert(height, pressure)
+{
+    var altpressure, F1, F2, F3, F;		
+    var F1 = (Math.pow(1013.25, 0.190284) * 0.0065)/288.15;
+    var F2 = Mheight/Math.pow((MBpressure - 0.3), 0.190284);
+    var F3 = 1/0.190284;
+    var F = Math.pow((1 + (F1 * F2)), F3);
+    var altpressure = (MBpressure - 0.3) * F
+    return altpressure;
+}
+    
+function convertinHGtomb(inHG)
+{
+    var mb;
+    mb = 33.8639*inHG;
+    return mb;
+}
+
+            
+function convertmbtoinHG(mb)
+{
+    var inHG;
+    inHG = 0.0295300*mb;
+    return inHG;
+}
+
+function convertmbtommHG(mb)
+{
+    var mmHG;
+    mmHG = 0.750062*mb;
+    return mmHG;
+}
+function convertmmHGtomb(mmHG)
+{
+    var mb;
+    mb = 1.333224*mmHG;
+    return mb;
+}
+
+
+function convertfeettometer(feet)
+{
+    var meter;
+    meter = 0.3048 * feet;
+    return meter;
+}
+
+function roundOff(value)
+{
+    value = Math.round(100*value)/100;
+    return value;
+}
+
+function setToNull()
+{
+    document.Convert.AltimeterSettinginHG.value="";
+    document.Convert.AltimeterSettingmmHG.value="";
+    document.Convert.AltimeterSettingmb.value="";
+    document.Convert.StnPress.value="";
+    document.Convert.Height.value="";
+}
+
+
+
+
+
 var pejsa = {
+
+     pressureCorrection: function(temperature, height, pressure) {
+        const KELVIN = 273.15;
+        const GRAVITY = 9.822631; // correct local gravity
+        const Boltzmann = 1.3806488e-27;
+        const amu = 1.66054e-27; // kg.
+    
+        let T = temperature + KELVIN; // temperature in K
+        let m = 28.95 * amu; // mean mass of dry air
+      
+        
+        let f = Math.exp((-GRAVITY * m * height)/(Boltzmann * T));
+        return pressure * f;
+    },        
+    
+    pressureCorrection2: function(temperature, height, pressure) {
+        // Tb = 288.15; // standard temperature K
+        let Tb = temperature + 273.15;
+        const Lb = -0.0065; // temperature lapse rate K/m
+        const R = 8.3144598; // universal gas constant
+        const M = 0.0289644; // molar mass of air (dry)    
+        const g0 = 9.822631; 
+        let f = Math.pow(Tb / (Tb + Lb * height), (g0 * M)/(R * Lb));
+        return pressure * f;
+    },   
+       
+    // Returns result in hPa - altitude in meters and less than 11 km
+    getStandardPressure: function(altitude)  {
+        const temperature = 15.0; // degrees Celsius.
+        const ATMOSPHERE = 1013.25; // hPa
+        const KELVIN = 273.15;
+        const EARTH_RADIUS =  6356.766; // km
+         // Practical Meteorology by Roland Stull, pg 12
+        // Validation data: https://www.avs.org/AVS/files/c7/c7edaedb-95b2-438f-adfb-36de54f87b9e.pdf
+        let altitude_km = altitude / 1000.0;  // Convert m to km
+        let geopot_height = EARTH_RADIUS * altitude_km / (EARTH_RADIUS + altitude_km);
+        let t = KELVIN + temperature - (6.5 * geopot_height);
+        return ATMOSPHERE * Math.pow(288.15 / t, -5.255877);
+    },
+    
     /**
         va0  - Velocity @ point a0, in feet/second (for example: velocity at 100 yards)
         va1  - Velocity @ point a1, in feet/second (for example: velocity at 200 yards)
