@@ -1,0 +1,11 @@
+[
+  { "name" : "Lapua Scenar L 90",    "bc" : 0.434, "shape" : 0.050, "weight" :  90.0, "speed" : 3140.0, "tempsens" : 3.1  },
+  { "name" : "Berger 88gr FB",       "bc" : 0.380, "shape" : 0.040, "weight" :  88.0, "speed" : 3240.0, "tempsens" : 3.1  },
+  { "name" : "Norma Oryx 100",       "bc" : 0.261, "shape" : 0.040, "weight" : 100.0, "speed" : 2850.0, "tempsens" : 3.2  },
+  { "name" : "Sierra GK SPBT 100",   "bc" : 0.419, "shape" : 0.048, "weight" : 100.0, "speed" : 2923.0, "tempsens" : 3.2  },
+  { "name" : "Sierra GK FMJ 90",     "bc" : 0.376, "shape" : 0.048, "weight" :  90.0, "speed" : 3050.0, "tempsens" : 3.1  },
+  { "name" : "Sierra MK HPBT 70",    "bc" : 0.260, "shape" : 0.048, "weight" :  70.0, "speed" : 3270.0, "tempsens" : 2.2  },
+  { "name" : "Nosler BT 95",         "bc" : 0.379, "shape" : 0.047, "weight" :  95.0, "speed" : 3060.0, "tempsens" : 3.1  },
+  { "name" : "Nosler Partition 100", "bc" : 0.395, "shape" : 0.045, "weight" : 100.0, "speed" : 2950.0, "tempsens" : 3.2  },
+  { "name" : "Hornady V-Max 75",     "bc" : 0.330, "shape" : 0.048, "weight" :  70.0, "speed" : 3230.0, "tempsens" : 2.25 }
+]
