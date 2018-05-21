@@ -3,156 +3,100 @@
 <head>
 <script src="new-pejsa.js"></script>
 
-<script>
-	
-	//Ceq	= Co * [FA * (1.0 + FT - FP) * FRH	] (5.1-1)
-
-
-	function atmCorrect(Altitude, Barometer, Temperature, RelativeHumidity) {
-   	
-        function calcFR(Temperature,  Pressure, RelativeHumidity)	{
-    		var VPw =  Temperature * ( Temperature * ( Temperature * 4e-6 - 4e-4 ) + 0.0234 ) - 0.2517;
-    		var FRH = 0.995*(Pressure/(Pressure - 0.3783 * RelativeHumidity * VPw));
-    		return FRH;
-    	}
-
-    	function calcFP(Pressure){
-    		var Pstd = 29.53; // in-hg
-    		return (Pressure - Pstd)/(Pstd);
-    	}
-
-    	function calcFT(Temperature, Altitude) {
-    		var Tstd = -0.0036 * Altitude + 59;
-    		return (Temperature - Tstd)/(459.6 + Tstd);
-    	}
-
-    	function calcFA(Altitude) {
-    		var a = -4e-15;
-    		var b = 4e-10;
-    		var c = -3e-5;
-    		var d = 1;
-    		return 1/(Altitude * (Altitude * ( Altitude * a + b) + c) + d);
-    	}
-
-        var FA = calcFA(Altitude);
-        var FT = calcFT(Temperature, Altitude);
-        var FR = calcFR(Temperature, Barometer, RelativeHumidity);
-        var FP = calcFP(Barometer);
-
-        // Calculate the atmospheric correction factor
-        var CD = (FA*(1 + FT - FP)*FR);
-        return CD;
-	}
-	
-    const POUNDS_PER_KG    = 2.20462;
-    const INCHES_PER_METRE = 39.3701;
-    const GRAVITY          = 9.822631; // correct local gravity
-    const GRAINS_PER_KG    = 15432;
-    const KELVIN           = 273.15;
-    const R                = 8.3145; // universal gas constant J/(K Mol)
-    
-    class EnvironmentalFactors {
-        constructor(temperature, pressure, humidity, windSpeed, windAngle) {
-            this.temperature = temperature;
-            this.pressure = pressure;
-            this.humidity = humidity;
-            this.windSpeed = windSpeed;
-            this.windAngle = windAngle;
-            this.headWind = Math.cos(windAngle) * windSpeed;
-            this.crossWind = Math.sin(windAngle) * windSpeed;
-            let T = temperature;
-            let TKel = KELVIN + T;
-            let p = pressure * 100; // in Pascals
-            const Md = 0.028964; // molar mass of dry air, kg/mol
-            const Mv = 0.018016; // molar mass of water vapor kg/mol
-            
-            // const Rv = 461.495;  // specific gas constant for water vapor J/(kg * K)
-            // const Rd = 287.058;  // specific gas constant for dry air J(kg*K)
-            let psat = 6107.8 * Math.exp(7.27 * T / TKel);
-            let pv = humidity * psat;
-            let pd = (p - pv);
-            this.rho = (pd * Md + pv * Mv) / (R * TKel);
-            let ENH = 3.141593e-8 * p + 1.00062 + T * T * 5.6e-7;
-            let PSV1 = TKel * (TKel * 0.000012378847 - 0.019121316);
-            let PSV2 = 33.93711047 - 6343.1645 / TKel;
-            let PSV = Math.exp(PSV1) * Math.exp(PSV2);
-            let Xw = humidity * ENH * PSV / p;
-            let Xc = 400 * Math.pow(10, -6);
-            let C1 = 331.5024 + (0.603055 - 0.000528 * T) * T + (51.471935 + (0.1495874 - 0.000782 * T) * T) * Xw;
-            let C2 = (-1.82e-7 + (3.73e-8 - 2.93e-10 * T) * T) * p + (-85.20931 + (-0.228525 + 0.0000591 * T) * T) * Xc;
-            let C3 = Xw * Xw * 2.835149 + p * p * 2.15e-13 - Xc * Xc * 29.179762 - 0.000486 * Xw * p * Xc;
-            this.mach1 = C1 + C2 - C3;
-        }
-    }
-
-	var stdEnvironment = new EnvironmentalFactors(15,1000,0.70,0,0);
-
-</script>
-
 <style>
-	.speed, .small-distance { text-align : right; }
-	.speed:after { content : " m/s"; }
-	.small-distance:after { content : " mm"; }
+	body {
+		font-family : sans-serif;
+	}
+	#solution {
+		border-collapse: collapse;
+		border-color : rgba(0,0,0,0.33);
+		box-shadow:  0px 2px 3px rgba(0,0,0,0.33);
+		border-bottom : 1px solid rgba(0,0,0,0.33);
+		
+	}
+	#solution th {
+		padding: 8px 12px;
+	}
+	#solution thead {
+		
+		background : #457;
+		color : white;
+		box-shadow:  0px 2px 3px rgba(0,0,0,0.25);
+	}
+	#solution td {
+		font-size: 12px;
+		text-align:right;
+		padding : 4px 16px;
+		border-top : 1px solid rgba(0,0,0,0.15);
+		background : rgba(0,0,0,0.05);
+	}
+	#solution tr:nth-child(4n+2) td {
+		background : white;
+	}
+	#solution tr:nth-child(4n+0) td {
+		background : rgba(68,85,119,0.33	);
+		font-weight : bold;
+	}
+	#solution tr:hover td {
+		background : #457;
+		color: white;
+	}
 </style>
 </head>
 <body>
-	<table>
-		<tr><td>Velocity</td><td class="speed" id="velocity"></td></tr>
-		<tr><td>Drop at range</td><td class="small-distance" id="drop"></td></tr>
-		<tr><td>Path at range</td><td class="small-distance" id="path"></td></tr>
+	<table id="solution">
+		<thead>
+			<tr>
+				<th>Range<br>m</th>
+				<th>Velocity<br>m/s</th>
+				<th>Path<br>mm</th>
+				<th>Wind<br>mm</th>
+				<th>Time<br>ms</th>
+				<th>Energy<br>J</th>
+			</tr>
+		</thead>
+		<tbody id="solution-content">
+		</tbody>
 	</table>	
 </div>
 
 <script defer>
-	var bc          = 0.430;  // G1
+	var bc          = 0.419;  // G1
 	var formFactor  = 0.5;    // boat tail
 	var temperature = 25;     // degrees C
-	var pressure    = 1013.25 // hPa
-	var humidity    = 0.5;    // 50% relative
-	var altitude    = 0;      // sea level.
-	var sightHeight = 44;     // mm
-	var v0 = 957.0; // m/s
+	var station_pressure = 1025.25; // hPa
+	var altitude    = 0;      // m.
+	var pressure    = station_pressure * Pejsa.pressureCorrection(altitude); // hPa - THIS IS ABSOLUTE LOCAL PRESSURE AS MEASURED ON THE SPOT.
+	var sightHeight = 0.044;     // m
+	var humidity    = 0.70;    // 50% relative
+	var v0 = 2923 * 0.3048; // 923.544; // m/s
 
-	var range       = 500.0; // m
+	// zero environment matches the current ... 
+	var env = new Pejsa.EnvironmentalFactors(temperature, pressure, humidity, 1.0, Math.PI	/2 )
+	var solution = new Pejsa.Solution(bc, formFactor, 0.0065, 0.044);
 	var zeroRange   = 250.0; //
 
-	var thisEnvironment = new EnvironmentalFactors(temperature, pressure, humidity, 0 ,0)
-	var drho = stdEnvironment.rho / thisEnvironment.rho;
-	var dmach = stdEnvironment.mach1 / thisEnvironment.mach1;
-	var total = drho *drho;
-	console.log(`Change in density: ${drho}`);
-	console.log(`Change in mach1: ${dmach}`);
-	console.log(`Combined ${total}`)
-	console.log(`Std model atmospheric adjustment ${atmCorrect(0, 29.9, 77, 0.5)}`);
-	// to use the pejsa formulations we need the drag factor and adjusted drag factor.
-	v0          /= 0.3048;
-	range       /= 0.9144;
-	zeroRange   /= 0.9144;
-	sightHeight /= 25.4;
+	solution.setZeroing(v0, zeroRange, 0.0, env);
+	// maybe change v0 due to temperature change from zeroing environment.
+	solution.setInitials(v0, env);
+	var destination = document.getElementById('solution-content');
+	destination.innerHTML = '';
+	for(var r=25; r<=500; r += 25) {
+		var s = solution.solveForRange(r);
+		var row = document.createElement('tr');
+		var col;
+		col = document.createElement('td'); col.innerText = s.x.toFixed(0);          row.appendChild(col); 
+		col = document.createElement('td'); col.innerText = s.v.toFixed(1);          row.appendChild(col); 
+		col = document.createElement('td'); col.innerText = (s.y * 1000).toFixed(0); row.appendChild(col);
+		col = document.createElement('td'); col.innerText = (s.w * 1000).toFixed(0); row.appendChild(col);
+		col = document.createElement('td'); col.innerText = (s.t * 1000).toFixed(0); row.appendChild(col);
+		col = document.createElement('td'); col.innerText = s.e.toFixed(0);          row.appendChild(col);
+		document.getElementById('solution-content').appendChild(row);
+	}
 
-	class Solution {
-		constructor(bc, formFactor, sightHeight, v0, temperature, pressure, humidity) {
-		}
-	};
+	var averageSpeed = 500 /  solution.solveForRange(500).t;
 
-	var F0 = pejsa.getF0byBC(v0, bc);
-
-	
-	var velocity = pejsa.getVelocity(v0, F0, formFactor, range) * 0.3048;
-	var drop     = pejsa.getDrop(v0, F0, formFactor, range) * 25.4; 
-    var path     = pejsa.getFlightPath(v0, F0, formFactor, range, sightHeight, zeroRange) * 25.4;
-   
-    document.getElementById('velocity').innerText = velocity.toFixed(1);
-	document.getElementById('drop').innerText = drop.toFixed(1);
-	document.getElementById('path').innerText = path.toFixed(1);
-
-	var height = 4061.5;
-	var temperature = 10.0;
-
-	console.log(pejsa.getStandardPressure(height));
-	console.log(pejsa.pressureCorrection(temperature, height, 1013.25))
-	console.log(pejsa.pressureCorrection2(temperature, height, 1013.25))
-
+	console.log(Pejsa.convertG1toG7(bc, v0/env.mach1));
 </script>
 </body>
 </html>
