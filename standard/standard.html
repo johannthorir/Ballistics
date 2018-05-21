@@ -3,77 +3,77 @@
 <head>
  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 
-	<title>Standard Model</title>
+    <title>Standard Model</title>
 
-	<script type="text/javascript" src="static/js/jquery-2.1.1.min.js"></script>
-	<script type="text/javascript" src="static/js/ballistics.js"></script>
+    <script type="text/javascript" src="static/js/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="static/js/ballistics.js"></script>
 
-	<style>
-		header { font-family : arial, sans-serif; font-size : 18px; font-weight: bold; }
-		table,#console { font-family : arial, sans-serif; font-size : 14px;}
-		.results { display : table; font-size : 14px; border : 1px solid rgba(0,0,0,0.2);  margin : 12px auto;	 }
-		.results .header { font-weight : bold; text-align : center; border : none; }
-		.row { display : table-row; border-top : 1px solid rgba(0,0,0,0.1); }
+    <style>
+        header { font-family : arial, sans-serif; font-size : 18px; font-weight: bold; }
+        table,#console { font-family : arial, sans-serif; font-size : 14px;}
+        .results { display : table; font-size : 14px; border : 1px solid rgba(0,0,0,0.2);  margin : 12px auto;	 }
+        .results .header { font-weight : bold; text-align : center; border : none; }
+        .row { display : table-row; border-top : 1px solid rgba(0,0,0,0.1); }
 
-		.col {
-			display : table-cell;
-			padding-top : 2px;
-			padding-bottom : 2px;
-			padding-left : 4px;
-			padding-right : 4px;
-			text-align : right;
-			border-top : 1px solid rgba(0,0,0,0.1);
-		}
-		.header .col { text-align : center; border : none; }
+        .col {
+            display : table-cell;
+            padding-top : 2px;
+            padding-bottom : 2px;
+            padding-left : 4px;
+            padding-right : 4px;
+            text-align : right;
+            border-top : 1px solid rgba(0,0,0,0.1);
+        }
+        .header .col { text-align : center; border : none; }
 
-		div.results div.row:nth-child(even) { background : rgba(64, 64, 128, 0.03);   }
-		div.results div.row:nth-child(odd)  { background : rgba(64, 64, 128, 0.06);   }
-		div.row	div.col:nth-child(even)     { background : rgba(64, 64, 128, 0.03);  }
-		div.row div.col:nth-child(odd)      { background : rgba(64, 64, 128, 0.06);   }
+        div.results div.row:nth-child(even) { background : rgba(64, 64, 128, 0.03);   }
+        div.results div.row:nth-child(odd)  { background : rgba(64, 64, 128, 0.06);   }
+        div.row	div.col:nth-child(even)     { background : rgba(64, 64, 128, 0.03);  }
+        div.row div.col:nth-child(odd)      { background : rgba(64, 64, 128, 0.06);   }
 
-		.zero      { color : blue; }
-		.unethical { color : #c93; }
-		.nonlethal { color : red; }
+        .zero      { color : blue; }
+        .unethical { color : #c93; }
+        .nonlethal { color : red; }
 
-		.range      { width :  8ex; }
-		.speed      { width :  6ex; }
-		.energy     { width :  6ex; }
-		.path       { width : 10ex; }
-		.clicks     { width : 10ex; }
-		.moa        { width :  6ex; }
-		.mil        { width :  6ex; }
-		.windage    { width :  6ex; }
-		.windeflect { width :  6ex; }
-		.time       { width :  6ex; }
-		.edges      { width :  3ex; color : #aaa;   }
+        .range      { width :  8ex; }
+        .speed      { width :  6ex; }
+        .energy     { width :  6ex; }
+        .path       { width : 10ex; }
+        .clicks     { width : 10ex; }
+        .moa        { width :  6ex; }
+        .mil        { width :  6ex; }
+        .windage    { width :  6ex; }
+        .windeflect { width :  6ex; }
+        .time       { width :  6ex; }
+        .edges      { width :  3ex; color : #aaa;   }
 
-		td.number { padding-right : 1ex;  padding-left : 0px; text-align : right;}
-		.number input { text-align : right; width : 48px;}
+        td.number { padding-right : 1ex;  padding-left : 0px; text-align : right;}
+        .number input { text-align : right; width : 48px;}
 
-		@media screen {
-			#inputform { display : block;  }
-			.info { font-style : italic; color : #999; font-size : 90% }
-		}
-		@media print {
-			#inputform, .info { display : none; }
-		}
-		#layout {
-		  display: flex;
-		  flex-flow: row wrap;
+        @media screen {
+            #inputform { display : block;  }
+            .info { font-style : italic; color : #999; font-size : 90% }
+        }
+        @media print {
+            #inputform, .info { display : none; }
+        }
+        #layout {
+          display: flex;
+          flex-flow: row wrap;
 
-		}
-		#inputform {
-			margin : 12px 12px;
-		}
-		#console {
-			margin : 12px 12px;
-		}
-		#scope {
-			width : 560px;
-			height : 560px;
-			margin : 12px 12px;
-		}
-	</style>
+        }
+        #inputform {
+            margin : 12px 12px;
+        }
+        #console {
+            margin : 12px 12px;
+        }
+        #scope {
+            width : 560px;
+            height : 560px;
+            margin : 12px 12px;
+        }
+    </style>
 
 <script>
 
@@ -107,7 +107,7 @@ function BulletsHere(data)  {
 
 
 function mb2inhg(mb) {
-	return mb / 33.86388;
+    return mb / 33.86388;
 }
 
 
@@ -130,54 +130,54 @@ function main() {
     var maxrange  =  parseFloat(document.getElementById('mr').value);
     var clicksize =  parseFloat(document.getElementById('cs').value); // one click at 100 m
 
-	var baro = parseFloat(document.getElementById('baro').value); // hPa
-	var temp = parseFloat(document.getElementById('temp').value); // �C
+    var baro = parseFloat(document.getElementById('baro').value); // hPa
+    var temp = parseFloat(document.getElementById('temp').value); // �C
     var humd = parseFloat(document.getElementById('humd').value)/100; // relative.
 
-	if(isNaN(clicksize)) clicksize = 0.700; // mm
-	if(isNaN(v) || v < 1000) return;
-	if(isNaN(bc))        bc = 0.3;
-	if(isNaN(vdiff))     vdiff = 0.0;
-	if(isNaN(sh))        sh = 44.0 / 25.4;
-	if(isNaN(zero_m))    zero_m = 100.0;
+    if(isNaN(clicksize)) clicksize = 0.700; // mm
+    if(isNaN(v) || v < 1000) return;
+    if(isNaN(bc))        bc = 0.3;
+    if(isNaN(vdiff))     vdiff = 0.0;
+    if(isNaN(sh))        sh = 44.0 / 25.4;
+    if(isNaN(zero_m))    zero_m = 100.0;
     if(isNaN(zero_h))    zero_h = 0.0;
-	if(isNaN(windspeed)) windspeed = 0.0;
-	if(isNaN(weight))	 weight = 100.0;
-	if(isNaN(maxrange))	 maxrange = 10.0;
+    if(isNaN(windspeed)) windspeed = 0.0;
+    if(isNaN(weight))	 weight = 100.0;
+    if(isNaN(maxrange))	 maxrange = 10.0;
     if(isNaN(baro))    	 baro = 1000;
     if(isNaN(temp))    	 temp = 10;
     if(isNaN(humd))  	 humd = 0.65;
 
-	var zero = zero_m/0.9144; // The zero range of the rifle, in yards.
-	if(bc == 0)	 return;
+    var zero = zero_m/0.9144; // The zero range of the rifle, in yards.
+    if(bc == 0)	 return;
 
-	if(document.getElementById('useweather').checked) {
-	    bc = AtmCorrect(bc, 0, hPa_to_inHg(baro), celsius_to_fahrenheit(temp), humd);
-    	document.getElementById('baro').disabled = false;
-		document.getElementById('temp').disabled = false;
-		document.getElementById('humd').disabled = false;
+    if(document.getElementById('useweather').checked) {
+        bc = AtmCorrect(bc, 0, hPa_to_inHg(baro), celsius_to_fahrenheit(temp), humd);
+        document.getElementById('baro').disabled = false;
+        document.getElementById('temp').disabled = false;
+        document.getElementById('humd').disabled = false;
 
     }
     else {
-    	document.getElementById('baro').disabled = true;
-		document.getElementById('temp').disabled = true;
-		document.getElementById('humd').disabled = true;
+        document.getElementById('baro').disabled = true;
+        document.getElementById('temp').disabled = true;
+        document.getElementById('humd').disabled = true;
     }
 
     var output    = "";
-	var zeroangle = MOAtoDeg(parseFloat(document.getElementById('za').value));
-	if(isNaN(zeroangle))
-		zeroangle = 0.0
+    var zeroangle = MOAtoDeg(parseFloat(document.getElementById('za').value));
+    if(isNaN(zeroangle))
+        zeroangle = 0.0
 
     if(!document.getElementById('useza').checked) {
-    	zeroangle = ZeroAngle(model, bc, v, sh, zero, zero_h);
-    	document.getElementById('za').value = DegtoMOA(zeroangle).toFixed(2);
-    	document.getElementById('zr').disabled = false;
-		document.getElementById('za').disabled = true;
+        zeroangle = ZeroAngle(model, bc, v, sh, zero, zero_h);
+        document.getElementById('za').value = DegtoMOA(zeroangle).toFixed(2);
+        document.getElementById('zr').disabled = false;
+        document.getElementById('za').disabled = true;
     }
     else {
-    	document.getElementById('zr').disabled = true;
-    	document.getElementById('za').disabled = false;
+        document.getElementById('zr').disabled = true;
+        document.getElementById('za').disabled = false;
     }
     var result = SolveAll(model, bc, weight, v, sh, angle, zeroangle, windspeed, windangle);
     var sln = result.solutions;
@@ -185,46 +185,46 @@ function main() {
     result.res_sup = SolveAll(model, bc, weight, v+vdiff, sh, angle, zeroangle, windspeed, windangle);
     result.res_sub = SolveAll(model, bc, weight, v-vdiff, sh, angle, zeroangle, windspeed, windangle);
 
-	result.maxrange= maxrange;
-	result.clicksize = clicksize;
+    result.maxrange= maxrange;
+    result.clicksize = clicksize;
 
 
-	output +=
-		'<div class="results"><div class="header row"><div class="col range">Fjarl.</div>' +
-		'<div class="col speed">Hraði</div>'  +
-		'<div class="col energy">Orka</div>' +
-		'<div class="col path">Ferill</div>' +
-		'<div class="col clicks">(clicks)</div>'+
-		'<div class="col mil">(MIL)</div>' +
-		'<div class="col windage">Fok </div>' +
-		'<div class="col windage">&harr;</div>' +
-		'<div class="col windeflect">Fok</div>' +
-		'<div class="col windeflect">&varr;</div>' +
-		'<div class="col time">Tími</div>' +
-		'</div>';
+    output +=
+        '<div class="results"><div class="header row"><div class="col range">Fjarl.</div>' +
+        '<div class="col speed">Hraði</div>'  +
+        '<div class="col energy">Orka</div>' +
+        '<div class="col path">Ferill</div>' +
+        '<div class="col clicks">(clicks)</div>'+
+        '<div class="col mil">(MIL)</div>' +
+        '<div class="col windage">Fok </div>' +
+        '<div class="col windage">&harr;</div>' +
+        '<div class="col windeflect">Fok</div>' +
+        '<div class="col windeflect">&varr;</div>' +
+        '<div class="col time">Tími</div>' +
+        '</div>';
 
     for (s=25;s<=maxrange;s+=25) {
-    	if(sln[s] == undefined)
-    		break;
-		var clss = 'row';
-		if(zero_m == s) clss += ' zero';
-    	else if(sln[s].energy < 850) clss += ' nonlethal';
-    	else if(sln[s].energy < 1300) clss += ' unethical';
+        if(sln[s] == undefined)
+            break;
+        var clss = 'row';
+        if(zero_m == s) clss += ' zero';
+        else if(sln[s].energy < 850) clss += ' nonlethal';
+        else if(sln[s].energy < 1300) clss += ' unethical';
 
         output += '<div class="' + clss + '">' +
-			'<div class="col range">'  + (sln[s].range * 0.9144).toFixed(0) + "</div>" +
-			'<div class="col speed">'  + (sln[s].velocity).toFixed(0) + "</div>"  +
-			'<div class="col energy">' + (sln[s].energy).toFixed(0) + "</div>" +
-			'<div class="col path">'   + (sln[s].path * 25.4).toFixed(0) +  " &pm;" +		((result.res_sup.solutions[s].path-result.res_sub.solutions[s].path)/2 * 25.4).toFixed(0)	 + "</div>" +
-			'<div class="col clicks">' + ((sln[s].path * 25.4)/(clicksize * s / 100)).toFixed(1) + "  &pm;" +		((result.res_sup.solutions[s].path-result.res_sub.solutions[s].path)/2 * 25.4 / (clicksize*s/100)).toFixed(1) + "</div>" +
-			// '<div class="col moa">(' +  (RadtoMOA(Math.atan(sln[s].path * 0.0254/s))).toFixed(1) + ")</div>" +
-			'<div class="col mil">(' +  (RadtoMIL(Math.atan(sln[s].path * 0.0254/s))).toFixed(1) + ")</div>" +
-			'<div class="col windage">'    + (sln[s].windage*25.4).toFixed(0)+ "</div>" +
-			'<div class="col windage">['    + ((sln[s].windage*25.4)/(clicksize * s / 100)).toFixed(1)+ "]</div>" +
-			'<div class="col windeflect">' + (sln[s].windage*25.4 * 0.07).toFixed(0) + "</div>" +
-			'<div class="col windeflect">[' + ((sln[s].windage*25.4*0.07)/(clicksize * s / 100)).toFixed(1) + "]</div>" +
-			'<div class="col time">' + (sln[s].time).toFixed(3) + "</div>" +
-			'</div>';
+            '<div class="col range">'  + (sln[s].range * 0.9144).toFixed(0) + "</div>" +
+            '<div class="col speed">'  + (sln[s].velocity).toFixed(0) + "</div>"  +
+            '<div class="col energy">' + (sln[s].energy).toFixed(0) + "</div>" +
+            '<div class="col path">'   + (sln[s].path * 25.4).toFixed(0) +  " &pm;" +		((result.res_sup.solutions[s].path-result.res_sub.solutions[s].path)/2 * 25.4).toFixed(0)	 + "</div>" +
+            '<div class="col clicks">' + ((sln[s].path * 25.4)/(clicksize * s / 100)).toFixed(1) + "  &pm;" +		((result.res_sup.solutions[s].path-result.res_sub.solutions[s].path)/2 * 25.4 / (clicksize*s/100)).toFixed(1) + "</div>" +
+            // '<div class="col moa">(' +  (RadtoMOA(Math.atan(sln[s].path * 0.0254/s))).toFixed(1) + ")</div>" +
+            '<div class="col mil">(' +  (RadtoMIL(Math.atan(sln[s].path * 0.0254/s))).toFixed(1) + ")</div>" +
+            '<div class="col windage">'    + (sln[s].windage*25.4).toFixed(0)+ "</div>" +
+            '<div class="col windage">['    + ((sln[s].windage*25.4)/(clicksize * s / 100)).toFixed(1)+ "]</div>" +
+            '<div class="col windeflect">' + (sln[s].windage*25.4 * 0.07).toFixed(0) + "</div>" +
+            '<div class="col windeflect">[' + ((sln[s].windage*25.4*0.07)/(clicksize * s / 100)).toFixed(1) + "]</div>" +
+            '<div class="col time">' + (sln[s].time).toFixed(3) + "</div>" +
+            '</div>';
    }
 
    output += "</div><p>Point blank vital size: " + (2*result.maxpath*2.54).toFixed(1) + " cm ";
@@ -236,105 +236,105 @@ function main() {
 
 
 function scope(results) {
-	var canvas   = document.getElementById('scope');
-	var context  = canvas.getContext('2d');
-	context.fillStyle = "#ccc";
-	context.clearRect(0, 0, canvas.width, canvas.height);
-	var clickoffset = parseInt(document.getElementById('co').value);
+    var canvas   = document.getElementById('scope');
+    var context  = canvas.getContext('2d');
+    context.fillStyle = "#ccc";
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    var clickoffset = parseInt(document.getElementById('co').value);
 
-	var imageObj = new Image();
-	imageObj.onload = function() {
-		var cx = 280;
-		var cy = 280;
-		var r1 = 198;
-		var r2 = 210;
-		context.drawImage(imageObj,0,0);
+    var imageObj = new Image();
+    imageObj.onload = function() {
+        var cx = 280;
+        var cy = 280;
+        var r1 = 198;
+        var r2 = 210;
+        context.drawImage(imageObj,0,0);
 
-		context.beginPath();
-		context.arc(cx, cy, r1, 0, 2 * Math.PI, false);
+        context.beginPath();
+        context.arc(cx, cy, r1, 0, 2 * Math.PI, false);
 
 
-		context.lineWidth = 1;
-		context.strokeStyle = '#011A5A';
-		context.stroke();
+        context.lineWidth = 1;
+        context.strokeStyle = '#011A5A';
+        context.stroke();
 
-		context.beginPath();
-		context.strokeStyle="#011A5A";
-		context.lineWidth = 12;
-		context.font = '16pt Calibri bold';
-		// textAlign aligns text horizontally relative to placement
-		context.textAlign = 'center';
-		// textBaseline aligns text vertically relative to font style
-		context.textBaseline = 'middle';
-		context.fillStyle = '#011A5A';
+        context.beginPath();
+        context.strokeStyle="#011A5A";
+        context.lineWidth = 12;
+        context.font = '16pt Calibri bold';
+        // textAlign aligns text horizontally relative to placement
+        context.textAlign = 'center';
+        // textBaseline aligns text vertically relative to font style
+        context.textBaseline = 'middle';
+        context.fillStyle = '#011A5A';
 
-		var startclick = -results.solutions[100].path * 25.4/results.clicksize;
-		
-		for(s=125; s<=results.maxrange; s += 25) {
-			var clicks = ((-results.solutions[s].path * 25.4)/(results.clicksize * s / 100));
-			var angle = (clicks - clickoffset) / 35 * 2 * Math.PI;
+        var startclick = -results.solutions[100].path * 25.4/results.clicksize;
+        
+        for(s=125; s<=results.maxrange; s += 25) {
+            var clicks = ((-results.solutions[s].path * 25.4)/(results.clicksize * s / 100));
+            var angle = (clicks - clickoffset) / 35 * 2 * Math.PI;
 
-			// draw a line segment
-			var xs = Math.cos(angle);
-			var ys = Math.sin(angle);
+            // draw a line segment
+            var xs = Math.cos(angle);
+            var ys = Math.sin(angle);
 
-			if(Math.abs(clicks - startclick) < 35) {
-				context.moveTo(cx + ys * r1, cy - xs*r1);
-				context.lineTo(cx + ys * r2, cy - xs*r2);
-			}
-			else {
-				context.moveTo(cx + ys * r1, cy - xs*r1);
-				context.lineTo(cx + ys * (2*r1-r2), cy - xs * (2*r1-r2));
-			}
-		}
-		r2 = 235;
-		for(s=100; s<=results.maxrange; s += 50) {
-			var clicks = ((-results.solutions[s].path * 25.4)/(results.clicksize * s / 100));
-			var angle = (clicks - clickoffset) / 35 * 2 * Math.PI;
+            if(Math.abs(clicks - startclick) < 35) {
+                context.moveTo(cx + ys * r1, cy - xs*r1);
+                context.lineTo(cx + ys * r2, cy - xs*r2);
+            }
+            else {
+                context.moveTo(cx + ys * r1, cy - xs*r1);
+                context.lineTo(cx + ys * (2*r1-r2), cy - xs * (2*r1-r2));
+            }
+        }
+        r2 = 235;
+        for(s=100; s<=results.maxrange; s += 50) {
+            var clicks = ((-results.solutions[s].path * 25.4)/(results.clicksize * s / 100));
+            var angle = (clicks - clickoffset) / 35 * 2 * Math.PI;
 
-			// draw a line segment
-			var xs = Math.cos(angle);
-			var ys = Math.sin(angle);
+            // draw a line segment
+            var xs = Math.cos(angle);
+            var ys = Math.sin(angle);
 
-			if(Math.abs(clicks - startclick) < 35) {
-				context.moveTo(cx + ys * r1, cy - xs*r1);
-				context.lineTo(cx + ys * r2, cy - xs*r2);
-				context.fillText(s, cx + ys * (r2+25), cy - xs*(r2+12));
-			}
-			else {
-				context.moveTo(cx + ys * r1, cy - xs*r1);
-				context.lineTo(cx + ys * (2*r1-r2), cy - xs * (2*r1-r2));
-				context.fillText(s, cx + ys * (2*r1-r2 - 25), cy - xs*(2*r1-r2-12));
-			}
-		}
+            if(Math.abs(clicks - startclick) < 35) {
+                context.moveTo(cx + ys * r1, cy - xs*r1);
+                context.lineTo(cx + ys * r2, cy - xs*r2);
+                context.fillText(s, cx + ys * (r2+25), cy - xs*(r2+12));
+            }
+            else {
+                context.moveTo(cx + ys * r1, cy - xs*r1);
+                context.lineTo(cx + ys * (2*r1-r2), cy - xs * (2*r1-r2));
+                context.fillText(s, cx + ys * (2*r1-r2 - 25), cy - xs*(2*r1-r2-12));
+            }
+        }
 
-		context.stroke();
-		context.stroke();
-	};
+        context.stroke();
+        context.stroke();
+    };
 
-	imageObj.src = './static/art/scope_clean.png';
+    imageObj.src = './static/art/scope_clean.png';
 }
 
 
 function point(x, y, r, c){
-	c.beginPath();
-	c.arc(x, y, r, 0, 2 * Math.PI, true);
-	c.fill();
+    c.beginPath();
+    c.arc(x, y, r, 0, 2 * Math.PI, true);
+    c.fill();
 
-	c.stroke();
+    c.stroke();
 }
 
 
 function crosshairs(results) {
-	var canvas   = document.getElementById('crosshairs');
-  	var context  = canvas.getContext('2d');
-	context.fillStyle = "#cccccc";
-	context.fillRect(0, 0, canvas.width, canvas.height);
+    var canvas   = document.getElementById('crosshairs');
+      var context  = canvas.getContext('2d');
+    context.fillStyle = "#cccccc";
+    context.fillRect(0, 0, canvas.width, canvas.height);
 
-	var oneclick = canvas.width / 128;
-	var cx = canvas.width / 2;
-	var cy = canvas.height / 2; 
-	var t = 0.5 / 2;
+    var oneclick = canvas.width / 128;
+    var cx = canvas.width / 2;
+    var cy = canvas.height / 2; 
+    var t = 0.5 / 2;
     var tt = 1.50 / 2;
 
     var a = (12.5 + tt - t)*oneclick;
@@ -342,230 +342,230 @@ function crosshairs(results) {
     var c = tt * oneclick;
     var d = t * oneclick;
 
-	context.fillStyle = "rgba(255,255,255,0.45)";
+    context.fillStyle = "rgba(255,255,255,0.45)";
     context.strokeStyle="rgba(0,0,0	,0.025)"
-	context.lineWidth = 4;
-	
-	for(s=100; s<=results.maxrange; s += 100) {
-		var vertical_clicks = ((-results.solutions[s].path * 25.4)/(results.clicksize * s / 100));
-		var horizontal_clicks = ((results.solutions[s].windage * 25.4)/(results.clicksize * s / 100));
-		point(cx + horizontal_clicks * oneclick, cy + vertical_clicks * oneclick, oneclick * 1780 / s, context);
-	}
+    context.lineWidth = 4;
+    
+    for(s=100; s<=results.maxrange; s += 100) {
+        var vertical_clicks = ((-results.solutions[s].path * 25.4)/(results.clicksize * s / 100));
+        var horizontal_clicks = ((results.solutions[s].windage * 25.4)/(results.clicksize * s / 100));
+        point(cx + horizontal_clicks * oneclick, cy + vertical_clicks * oneclick, oneclick * 1780 / s, context);
+    }
 
     context.fillStyle = "#811";
 
-	for(s=100; s<=results.maxrange; s += 100) {
-		var t = s - 50;
-		var vertical_clicks = ((-results.solutions[t].path * 25.4)/(results.clicksize * t / 100));
-		var horizontal_clicks = ((results.solutions[t].windage * 25.4)/(results.clicksize * t / 100));
-		
-		point(cx + horizontal_clicks * oneclick, cy + vertical_clicks * oneclick, 1, context);
+    for(s=100; s<=results.maxrange; s += 100) {
+        var t = s - 50;
+        var vertical_clicks = ((-results.solutions[t].path * 25.4)/(results.clicksize * t / 100));
+        var horizontal_clicks = ((results.solutions[t].windage * 25.4)/(results.clicksize * t / 100));
+        
+        point(cx + horizontal_clicks * oneclick, cy + vertical_clicks * oneclick, 1, context);
 
-		var vertical_clicks = ((-results.solutions[s].path * 25.4)/(results.clicksize * s / 100));
-		var horizontal_clicks = ((results.solutions[s].windage * 25.4)/(results.clicksize * s / 100));
-		
-		point(cx + horizontal_clicks * oneclick, cy + vertical_clicks * oneclick, 3, context);
-	}
+        var vertical_clicks = ((-results.solutions[s].path * 25.4)/(results.clicksize * s / 100));
+        var horizontal_clicks = ((results.solutions[s].windage * 25.4)/(results.clicksize * s / 100));
+        
+        point(cx + horizontal_clicks * oneclick, cy + vertical_clicks * oneclick, 3, context);
+    }
 
-	var s = 25;
-	var vertical_clicks   = ((-results.solutions[s].path    * 25.4)/(results.clicksize * s / 100));
-	var horizontal_clicks = (( results.solutions[s].windage * 25.4)/(results.clicksize * s / 100));
-	context.beginPath();
+    var s = 25;
+    var vertical_clicks   = ((-results.solutions[s].path    * 25.4)/(results.clicksize * s / 100));
+    var horizontal_clicks = (( results.solutions[s].windage * 25.4)/(results.clicksize * s / 100));
+    context.beginPath();
 
     context.strokeStyle="rgba(0,0,0	,0.5)"
-	context.lineWidth = 1;
+    context.lineWidth = 1;
 
-	context.moveTo(cx + horizontal_clicks * oneclick, cy + vertical_clicks * oneclick)	
-	for(s+=5; s<=results.maxrange; s += 5) {
+    context.moveTo(cx + horizontal_clicks * oneclick, cy + vertical_clicks * oneclick)	
+    for(s+=5; s<=results.maxrange; s += 5) {
 
-		var vertical_clicks = ((-results.solutions[s].path * 25.4)/(results.clicksize * s / 100));
-		var horizontal_clicks = ((results.solutions[s].windage * 25.4)/(results.clicksize * s / 100));
-		context.lineTo(cx + horizontal_clicks * oneclick, cy + vertical_clicks * oneclick);
-	}
-	
-	context.stroke();
-	context.fillStyle ="#000";
-	context.beginPath();
+        var vertical_clicks = ((-results.solutions[s].path * 25.4)/(results.clicksize * s / 100));
+        var horizontal_clicks = ((results.solutions[s].windage * 25.4)/(results.clicksize * s / 100));
+        context.lineTo(cx + horizontal_clicks * oneclick, cy + vertical_clicks * oneclick);
+    }
+    
+    context.stroke();
+    context.fillStyle ="#000";
+    context.beginPath();
 
-	context.moveTo(0,     cy - c);	
-	context.lineTo(cx - a, cy - c);
-	context.lineTo(cx - b, cy - d);
-	
-	context.lineTo(cx - d, cy - d);
-	
-	context.lineTo(cx - d, cy - b);
-	context.lineTo(cx - c, cy - a);
-	context.lineTo(cx - c, 0     );
-	context.lineTo(cx + c, 0     ) ;
-	context.lineTo(cx + c, cy - a);
-	context.lineTo(cx + d, cy - b);
-	
-	context.lineTo(cx + d, cy - d);
+    context.moveTo(0,     cy - c);	
+    context.lineTo(cx - a, cy - c);
+    context.lineTo(cx - b, cy - d);
+    
+    context.lineTo(cx - d, cy - d);
+    
+    context.lineTo(cx - d, cy - b);
+    context.lineTo(cx - c, cy - a);
+    context.lineTo(cx - c, 0     );
+    context.lineTo(cx + c, 0     ) ;
+    context.lineTo(cx + c, cy - a);
+    context.lineTo(cx + d, cy - b);
+    
+    context.lineTo(cx + d, cy - d);
 
-	context.lineTo(cx + b, cy - d);
-	context.lineTo(cx + a, cy - c);
-	context.lineTo(canvas.width - 1, cy - c);
-	context.lineTo(canvas.width - 1, cy + c);
-	context.lineTo(cx + a, cy + c);
-	context.lineTo(cx + b, cy + d);
-	
-	context.lineTo(cx + d, cy + d);
-	
-	context.lineTo(cx + d, cy + b);
-	context.lineTo(cx + c, cy + a);
-	context.lineTo(cx + c, canvas.height - 1);
-	context.lineTo(cx - c, canvas.height - 1);
-	context.lineTo(cx - c, cy + a);
-	context.lineTo(cx - d, cy + b);
+    context.lineTo(cx + b, cy - d);
+    context.lineTo(cx + a, cy - c);
+    context.lineTo(canvas.width - 1, cy - c);
+    context.lineTo(canvas.width - 1, cy + c);
+    context.lineTo(cx + a, cy + c);
+    context.lineTo(cx + b, cy + d);
+    
+    context.lineTo(cx + d, cy + d);
+    
+    context.lineTo(cx + d, cy + b);
+    context.lineTo(cx + c, cy + a);
+    context.lineTo(cx + c, canvas.height - 1);
+    context.lineTo(cx - c, canvas.height - 1);
+    context.lineTo(cx - c, cy + a);
+    context.lineTo(cx - d, cy + b);
 
-	context.lineTo(cx - d, cy + d);
-	
-	context.lineTo(cx - b, cy + d);
-	context.lineTo(cx - a, cy + c);
-	context.lineTo(0,      cy + c);
-	context.fill();
+    context.lineTo(cx - d, cy + d);
+    
+    context.lineTo(cx - b, cy + d);
+    context.lineTo(cx - a, cy + c);
+    context.lineTo(0,      cy + c);
+    context.fill();
 }
 
 
 function redraw() {
- 	var results = main();
+     var results = main();
     if(results == undefined) return;
 
     scope(results);
-	crosshairs(results);
-	
- 	return;
+    crosshairs(results);
+    
+     return;
 
-	/*
+    /*
     var drawingCanvas = document.getElementById('myDrawing');
     drawingCanvas.width = drawingCanvas.width;
     var border = 0;
 
     function mapX(x) { return x/results.maxrange  * (drawingCanvas.width - border*2) + border;  }
 
-  	function mapY(y) {  return drawingCanvas.height - (y/1000.0 * (drawingCanvas.height - border*2) + border + drawingCanvas.height/2);  }
+      function mapY(y) {  return drawingCanvas.height - (y/1000.0 * (drawingCanvas.height - border*2) + border + drawingCanvas.height/2);  }
 
     // Check the element is in the DOM and the browser supports canvas
 
-	if(drawingCanvas.getContext) {
-		// Initaliase a 2-dimensional drawing context
-		var context = drawingCanvas.getContext('2d');
-		context.fillStyle = "#ffffff";
-		context.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+    if(drawingCanvas.getContext) {
+        // Initaliase a 2-dimensional drawing context
+        var context = drawingCanvas.getContext('2d');
+        context.fillStyle = "#ffffff";
+        context.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
 
-		sln = results.solutions;
-		slnp = results.res_sup.solutions;
-		slnb = results.res_sub.solutions;
+        sln = results.solutions;
+        slnp = results.res_sup.solutions;
+        slnb = results.res_sub.solutions;
 
-		context.beginPath();
-		context.strokeStyle="#00000";
-		context.lineWidth = 0.125;
+        context.beginPath();
+        context.strokeStyle="#00000";
+        context.lineWidth = 0.125;
 
-		for(s=0; s<=results.maxrange; s+=25) {
-			var x = mapX(s);
-			context.moveTo(x,0);
-			context.lineTo(x,drawingCanvas.height);
-		}
+        for(s=0; s<=results.maxrange; s+=25) {
+            var x = mapX(s);
+            context.moveTo(x,0);
+            context.lineTo(x,drawingCanvas.height);
+        }
 
 
-		for(s=1; s<=500; s+=50) {
-			var y1 = mapY(s);
-			var y2 = mapY(-s);
-			context.moveTo(0,y1);
-			context.lineTo(drawingCanvas.width, y1);
-			context.moveTo(0,y2);
-			context.lineTo(drawingCanvas.width, y2);
-		}
+        for(s=1; s<=500; s+=50) {
+            var y1 = mapY(s);
+            var y2 = mapY(-s);
+            context.moveTo(0,y1);
+            context.lineTo(drawingCanvas.width, y1);
+            context.moveTo(0,y2);
+            context.lineTo(drawingCanvas.width, y2);
+        }
 
-		context.stroke();
+        context.stroke();
 
-		// killzone
-		context.beginPath();
-		context.lineWidth = 1;
-		var fromX = mapX(0);
-		var toX = mapX(results.outerpathrange*0.9144);
-		var fromY = mapY(results.outerpath * 25.4);
-		var toY   = mapY(results.maxpath*25.4);
-		context.fillStyle="rgba(0,70,100,0.1)";
-		context.rect(fromX, fromY, (toX - fromX), (toY - fromY));
-		context.fill();
-		// context.stroke();
+        // killzone
+        context.beginPath();
+        context.lineWidth = 1;
+        var fromX = mapX(0);
+        var toX = mapX(results.outerpathrange*0.9144);
+        var fromY = mapY(results.outerpath * 25.4);
+        var toY   = mapY(results.maxpath*25.4);
+        context.fillStyle="rgba(0,70,100,0.1)";
+        context.rect(fromX, fromY, (toX - fromX), (toY - fromY));
+        context.fill();
+        // context.stroke();
 
-		context.strokeStyle = "#000000";
+        context.strokeStyle = "#000000";
 
-		// horizontal sightline.
-		context.beginPath();
-		context.moveTo(mapX(0), mapY(0));
-		context.lineTo(mapX(results.maxrange), mapY(0));
-		context.stroke();
+        // horizontal sightline.
+        context.beginPath();
+        context.moveTo(mapX(0), mapY(0));
+        context.lineTo(mapX(results.maxrange), mapY(0));
+        context.stroke();
 
-		//  main bullet path
-		context.beginPath();
-		context.lineWidth = 0.5;
+        //  main bullet path
+        context.beginPath();
+        context.lineWidth = 0.5;
 
-		context.moveTo(mapX(0), mapY(sln[0].path*25.4));
-		for(s=1; s<=results.maxrange; s++)
-			context.lineTo(mapX(s), mapY(sln[s].path*25.4));
-	
-		context.stroke();
+        context.moveTo(mapX(0), mapY(sln[0].path*25.4));
+        for(s=1; s<=results.maxrange; s++)
+            context.lineTo(mapX(s), mapY(sln[s].path*25.4));
+    
+        context.stroke();
 
-		// bullet straying due to variation in muzzle speed.
-		context.beginPath();
-		context.fillStyle="rgba(0,0,0,0.1)";
-		context.moveTo(mapX(0), mapY(slnb[0].path*25.4));
+        // bullet straying due to variation in muzzle speed.
+        context.beginPath();
+        context.fillStyle="rgba(0,0,0,0.1)";
+        context.moveTo(mapX(0), mapY(slnb[0].path*25.4));
 
-		for(s=1; s<=results.maxrange; s++)
-			context.lineTo(mapX(s), mapY(slnb[s].path*25.4));
+        for(s=1; s<=results.maxrange; s++)
+            context.lineTo(mapX(s), mapY(slnb[s].path*25.4));
 
-		for(s=results.maxrange; s>=0; s--)
-			context.lineTo(mapX(s), mapY(slnp[s].path*25.4));
-		context.fill();
+        for(s=results.maxrange; s>=0; s--)
+            context.lineTo(mapX(s), mapY(slnp[s].path*25.4));
+        context.fill();
 
-		// high point
-		context.beginPath();
-		context.strokeStyle = "#eecc00";
-		context.moveTo(mapX(0), mapY(results.maxpath * 25.4));
-		context.lineTo(mapX(results.maxrange), mapY(results.maxpath * 25.4));
-		context.moveTo(mapX(results.maxpathrange*0.9144), mapY(-500));
-		context.lineTo(mapX(results.maxpathrange*0.9144), mapY(500));
-		context.stroke();
-	}
-	*/
+        // high point
+        context.beginPath();
+        context.strokeStyle = "#eecc00";
+        context.moveTo(mapX(0), mapY(results.maxpath * 25.4));
+        context.lineTo(mapX(results.maxrange), mapY(results.maxpath * 25.4));
+        context.moveTo(mapX(results.maxpathrange*0.9144), mapY(-500));
+        context.lineTo(mapX(results.maxpathrange*0.9144), mapY(500));
+        context.stroke();
+    }
+    */
 }
 
 
 function spinTemp(event) {
-	if(event != undefined)	{
-    	var keyCode = event.which;
+    if(event != undefined)	{
+        var keyCode = event.which;
 
-    	if (keyCode == undefined)
+        if (keyCode == undefined)
             keyCode = event.keyCode;
 
-       	// alert(keyCode + "  " + event.target.value);
-       	if(keyCode == 38) 
-        	event.target.value = (parseFloat(event.target.value) + 1).toFixed(0);
-       	else if(keyCode == 40) 
-       		event.target.value = (parseFloat(event.target.value) - 1).toFixed(0);
+           // alert(keyCode + "  " + event.target.value);
+           if(keyCode == 38) 
+            event.target.value = (parseFloat(event.target.value) + 1).toFixed(0);
+           else if(keyCode == 40) 
+               event.target.value = (parseFloat(event.target.value) - 1).toFixed(0);
    }
 }
 
 function spin(event, step, round) {
-	if(event != undefined)	{
-    	var keyCode = event.which;
-    	if(keyCode == undefined)  keyCode = event.keyCode;
-       	// alert(keyCode + "  " + event.target.value);
-       	if(keyCode == 38) event.target.value = (parseFloat(event.target.value) + step).toFixed(round);
-       	else if(keyCode == 40) event.target.value = (Math.max(parseFloat(event.target.value) - step, 0)).toFixed(round);
-   	}
+    if(event != undefined)	{
+        var keyCode = event.which;
+        if(keyCode == undefined)  keyCode = event.keyCode;
+           // alert(keyCode + "  " + event.target.value);
+           if(keyCode == 38) event.target.value = (parseFloat(event.target.value) + step).toFixed(round);
+           else if(keyCode == 40) event.target.value = (Math.max(parseFloat(event.target.value) - step, 0)).toFixed(round);
+       }
 }
 
 
 function spinall(event, step, round) {
-	if(event != undefined) {
+    if(event != undefined) {
         var keyCode = event.which;
-      	if(keyCode == undefined) keyCode = event.keyCode;
-       	if(keyCode == 38) event.target.value = (parseFloat(event.target.value) + step).toFixed(round);
-       	else if(keyCode == 40) event.target.value = (parseFloat(event.target.value) - step).toFixed(round);
+          if(keyCode == undefined) keyCode = event.keyCode;
+           if(keyCode == 38) event.target.value = (parseFloat(event.target.value) + step).toFixed(round);
+           else if(keyCode == 40) event.target.value = (parseFloat(event.target.value) - step).toFixed(round);
     }
 }
 
@@ -580,12 +580,12 @@ function moaspin(event) {
        if(keyCode == undefined) keyCode = event.keyCode;
        if(keyCode == 38) event.target.value = (parseFloat(event.target.value) + step).toFixed(round);
        else if(keyCode == 40) event.target.value = (parseFloat(event.target.value) - step).toFixed(round);
-	}
+    }
 }
 
 $(document).ready(function() {
-	$.getJSON("./bullets.json",  {}).done(BulletsHere).fail(() => { console.log('failed to fetch bullets') });
-	redraw();
+    $.getJSON("./bullets.json",  {}).done(BulletsHere).fail(() => { console.log('failed to fetch bullets') });
+    redraw();
 });
 
 </script>
@@ -631,27 +631,27 @@ Berger #24323 88gr High BC FB Varmint
 </div>
 <div id="layout">
 <div id="inputform">
-	<table cellspacing="0">
-	<tr><td>Bullet shortcut:</td><td><select name="bullets" id="bullets" onchange="setBullet(this.selectedIndex);"></select></td></tr>
-	<tr><td><select id="md" onchange="redraw()"><option value="1" selected>G1</option><option value="7">G7</option></select> BC:</td><td class="number" ><input onkeyup="redraw();" type="number"  min="0.001" max="1.000" step="0.001" value="0.379" id="bc" /></td></tr>
-	<tr><td>Hraði við hlaupenda </td><td class="number" >
-	<input onkeyup="redraw();" onkeydown="spin(event,5,0)" type="text" value="2990"  id="mv"  /> +/-
-	<input onkeyup="redraw();" onkeydown="spin(event,1,0)" type="text" value="25"  id="mvdiff" style="width:3ex;"  />
-	</td><td>fps</td></tr>
-	<tr><td>Þyngd</td><td class="number" ><input onkeyup="redraw();" onkeydown="spin(event,5,0)"  type="text" value="100"   id="bw"  /></td><td>gr</td></tr>
-	<tr><td>Núllfjarlægð</td><td class="number" ><input onkeyup="redraw();" onkeydown="spin(event,5,0)" type="text" value="100"   id="zr"  /></td><td>m</td></tr>
-	<tr><td>Núllákoma</td><td class="number" ><input onkeyup="redraw();" onkeydown="spinall(event, 1, 0)" type="text" value="0" id="zh" /></td><td>mm</td></tr>
-	<tr><td>Kíkisklikk</td><td class="number" ><input onkeyup="redraw();" type="text" value="7.0" id="cs" /></td><td>mm @ 100m</td></tr>
-	<tr><td><input type="checkbox" id="useza" onclick="redraw();"/>Horn:</td><td class="number"><input onkeyup="redraw();" onkeydown="moaspin(event)" type="text" value="3.97" id="za"/></td><td>MOA</td></tr>
-	<tr><td>Kíkismiðja frá hlaupmiðju</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 1,0)" type="text" value="44" id="sh" /></td><td>mm</td></tr>
-	<tr><td>Vindhraði þvert</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 1,0)" type="text" value="5" id="ws"></td><td>m/s</td></tr>
-	<tr><td>Reikna út í</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 50, 0)" type="text" value="300" id="mr"></td><td>m</td></tr>
-	<tr><td>Núllklikk</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 1, 0)" type="text" value="23" id="co"></td><td>klikk</td></tr>
-	<tr><td><input type="checkbox" id="useweather" onclick="redraw();"/> Leiðrétta fyrir veðurskilyrði</td><td></td></tr>
-	<tr><td>Loftþrýstingur á stað:</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 1,0)" type="text" value="1015" id="baro"></td><td>hPa</td></tr>
-	<tr><td>Hitastic:</td><td class="number"><input onkeyup="redraw();" onkeydown="spinTemp(event)" type="text" value="10" id="temp"></td><td>C</td></tr>
-	<tr><td>Loftraki</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 1,0)" type="text" value="50" id="humd"></td><td>%</td></tr>
-	</table>
+    <table cellspacing="0">
+    <tr><td>Bullet shortcut:</td><td><select name="bullets" id="bullets" onchange="setBullet(this.selectedIndex);"></select></td></tr>
+    <tr><td><select id="md" onchange="redraw()"><option value="1" selected>G1</option><option value="7">G7</option></select> BC:</td><td class="number" ><input onkeyup="redraw();" type="number"  min="0.001" max="1.000" step="0.001" value="0.379" id="bc" /></td></tr>
+    <tr><td>Hraði við hlaupenda </td><td class="number" >
+    <input onkeyup="redraw();" onkeydown="spin(event,5,0)" type="text" value="2990"  id="mv"  /> +/-
+    <input onkeyup="redraw();" onkeydown="spin(event,1,0)" type="text" value="25"  id="mvdiff" style="width:3ex;"  />
+    </td><td>fps</td></tr>
+    <tr><td>Þyngd</td><td class="number" ><input onkeyup="redraw();" onkeydown="spin(event,5,0)"  type="text" value="100"   id="bw"  /></td><td>gr</td></tr>
+    <tr><td>Núllfjarlægð</td><td class="number" ><input onkeyup="redraw();" onkeydown="spin(event,5,0)" type="text" value="100"   id="zr"  /></td><td>m</td></tr>
+    <tr><td>Núllákoma</td><td class="number" ><input onkeyup="redraw();" onkeydown="spinall(event, 1, 0)" type="text" value="0" id="zh" /></td><td>mm</td></tr>
+    <tr><td>Kíkisklikk</td><td class="number" ><input onkeyup="redraw();" type="text" value="7.0" id="cs" /></td><td>mm @ 100m</td></tr>
+    <tr><td><input type="checkbox" id="useza" onclick="redraw();"/>Horn:</td><td class="number"><input onkeyup="redraw();" onkeydown="moaspin(event)" type="text" value="3.97" id="za"/></td><td>MOA</td></tr>
+    <tr><td>Kíkismiðja frá hlaupmiðju</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 1,0)" type="text" value="44" id="sh" /></td><td>mm</td></tr>
+    <tr><td>Vindhraði þvert</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 1,0)" type="text" value="5" id="ws"></td><td>m/s</td></tr>
+    <tr><td>Reikna út í</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 50, 0)" type="text" value="300" id="mr"></td><td>m</td></tr>
+    <tr><td>Núllklikk</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 1, 0)" type="text" value="23" id="co"></td><td>klikk</td></tr>
+    <tr><td><input type="checkbox" id="useweather" onclick="redraw();"/> Leiðrétta fyrir veðurskilyrði</td><td></td></tr>
+    <tr><td>Loftþrýstingur á stað:</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 1,0)" type="text" value="1015" id="baro"></td><td>hPa</td></tr>
+    <tr><td>Hitastic:</td><td class="number"><input onkeyup="redraw();" onkeydown="spinTemp(event)" type="text" value="10" id="temp"></td><td>C</td></tr>
+    <tr><td>Loftraki</td><td class="number"><input onkeyup="redraw();" onkeydown="spin(event, 1,0)" type="text" value="50" id="humd"></td><td>%</td></tr>
+    </table>
 </div>
 
 <div id="console"></div>
