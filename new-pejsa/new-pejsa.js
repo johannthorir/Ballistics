@@ -64,6 +64,46 @@ function getCD(mach, CDTable) {
 
 
 var pejsa = {
+
+     pressureCorrection: function(temperature, height, pressure) {
+        const KELVIN = 273.15;
+        const GRAVITY = 9.822631; // correct local gravity
+        const Boltzmann = 1.3806488e-27;
+        const amu = 1.66054e-27; // kg.
+    
+        let T = temperature + KELVIN; // temperature in K
+        let m = 28.95 * amu; // mean mass of dry air
+      
+        
+        let f = Math.exp((-GRAVITY * m * height)/(Boltzmann * T));
+        return pressure * f;
+    },        
+    
+    pressureCorrection2: function(temperature, height, pressure) {
+        // Tb = 288.15; // standard temperature K
+        let Tb = temperature + 273.15;
+        const Lb = -0.0065; // temperature lapse rate K/m
+        const R = 8.3144598; // universal gas constant
+        const M = 0.0289644; // molar mass of air (dry)    
+        const g0 = 9.822631; 
+        let f = Math.pow(Tb / (Tb + Lb * height), (g0 * M)/(R * Lb));
+        return pressure * f;
+    },   
+       
+    // Returns result in hPa - altitude in meters and less than 11 km
+    getStandardPressure: function(altitude)  {
+        const temperature = 15.0; // degrees Celsius.
+        const ATMOSPHERE = 1013.25; // hPa
+        const KELVIN = 273.15;
+        const EARTH_RADIUS =  6356.766; // km
+         // Practical Meteorology by Roland Stull, pg 12
+        // Validation data: https://www.avs.org/AVS/files/c7/c7edaedb-95b2-438f-adfb-36de54f87b9e.pdf
+        let altitude_km = altitude / 1000.0;  // Convert m to km
+        let geopot_height = EARTH_RADIUS * altitude_km / (EARTH_RADIUS + altitude_km);
+        let t = KELVIN + temperature - (6.5 * geopot_height);
+        return ATMOSPHERE * Math.pow(288.15 / t, -5.255877);
+    },
+    
     /**
         va0  - Velocity @ point a0, in feet/second (for example: velocity at 100 yards)
         va1  - Velocity @ point a1, in feet/second (for example: velocity at 200 yards)

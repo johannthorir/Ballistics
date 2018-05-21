@@ -47,6 +47,14 @@
     document.getElementById('velocity').innerText = velocity.toFixed(1);
 	document.getElementById('drop').innerText = drop.toFixed(1);
 	document.getElementById('path').innerText = path.toFixed(1);
+
+	var height = 4061.5;
+	var temperature = 10.0;
+
+	console.log(pejsa.getStandardPressure(height));
+	console.log(pejsa.pressureCorrection(temperature, height, 1013.25))
+	console.log(pejsa.pressureCorrection2(temperature, height, 1013.25))
+
 </script>
 </body>
 </html>
