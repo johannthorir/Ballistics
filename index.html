@@ -2,23 +2,82 @@
 <html>
     <head>
         <title>Exterior Ballistics Experiments</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,500,700,400italic|Material+Icons">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+        <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.blue_grey-light_blue.min.css" />
+        <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    
         <style>
             body {
                 font-family: 'Roboto';
             }
+            .card-wide.mdl-card {
+                 width: 512px;
+            }
+            .card-wide > .mdl-card__title {
+                color: #fff;
+                height: 176px;
+                background: #1e3149;/*url('../assets/demos/welcome_card.jpg') center / cover;*/
+            }
         </style>
     </head>
     <body>
-        <h1>Exterior Ballistics Experiments</h1>
-        <h2><a href="new-pejsa/test-pejsa.html">New pejsa lib</a></h2>
-        <p>This is a new library to calcualate exterior ballistics according to Pejsa.</p>
-        <h2><a href="pejsa/pejsa.html">Pejsa</a></h2>
-        <p>The older proof-of-concept Pejsa calculations - not implemented as a library.</p>
-        <h2><a href="standard/standard.html">Standard</a></h2>
-        <p>The older version of the standard model where the ballistics are solved with numerical integration.</p>
-        <h2><a href="invue/index.html">Vue.js version</a></h2>
-        <p>An experiment in implementing the standard method in Vue.</p>
-        
+        <div class="mdl-layout mdl-js-layout">
+            <header class="mdl-layout__header mdl-layout__header--waterfall">
+                <div class="mdl-layout__header-row">
+                    <span class="mdl-layout__title">Exterior Ballistics Experiments</span>
+                </div>        
+            </header>
+            <main class="mdl-layout__content">
+                <div class="page-content">
+                    <div class="mdl-grid">
+                    <div class="card-wide mdl-card mdl-shadow--2dp mdl-cell">
+                        <div class="mdl-card__title"><h2>New pejsa lib</h2></div>
+                        <div class="mdl-card__supporting-text">This is a new library to calcualate exterior ballistics according to Pejsa.</div>
+                        <div class="mdl-card__actions mdl-card--border">
+                            <a href="new-pejsa/test-pejsa.html" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                                Load
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="card-wide mdl-card mdl-shadow--2dp mdl-cell">
+                        <div class="mdl-card__title"><h2>Pejsa</h2></div>
+                        <div class="mdl-card__supporting-text">The older proof-of-concept Pejsa calculations - not implemented as a library.</div>
+                        <div class="mdl-card__actions mdl-card--border">
+                            <a href="pejsa/pejsa.html" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                                Check out
+                            </a>
+                        </div>
+                    </div>
+                            
+                    <div class="card-wide mdl-card mdl-shadow--2dp mdl-cell">
+                        <div class="mdl-card__title"> <h2>Standard</h2></div>
+                        <div class="mdl-card__supporting-text">
+                            The older version of the standard model where the ballistics are solved with numerical integration.
+                        </div>
+                        <div class="mdl-card__actions mdl-card--border">
+                            <a href="standard/standard.html" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                                Take a look
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="card-wide mdl-card mdl-shadow--2dp mdl-cell">
+                        <div class="mdl-card__title"> <h2>Vue.js version</h2></div>
+                        <div class="mdl-card__supporting-text">
+                            An experiment in implementing the standard model in Vue.js.
+                        </div>
+                        <div class="mdl-card__actions mdl-card--border">
+                            <a href="invue/index.html" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                                Start
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </main>
+        </div>
     </body>
 </html>
