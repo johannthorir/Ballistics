@@ -89,18 +89,19 @@ function loaded()
 	var  sighting_pressure     = parseFloat(document.getElementById('prs').value);
 	var  temperature           = parseFloat(document.getElementById('tc').value);
 	var  air_pressure          = parseFloat(document.getElementById('pr').value);
-	var  sighting_velocity       = parseFloat(document.getElementById('mv').value);
+	var  sighting_velocity     = parseFloat(document.getElementById('mv').value);
 	var  tempsens              = parseFloat(document.getElementById('ts').value);
 	var  muzzle_velocity       = sighting_velocity + (temperature - sighting_temperature)*tempsens;
 
 
-    var  i;
-    var   retard_coeff     = ballistic_coefficient * mayewski_constant * Math.pow(muzzle_velocity, 0.45);
-
+    var i;
+    var retard_coeff     = ballistic_coefficient * mayewski_constant * Math.pow(muzzle_velocity, 0.45);
+	var Tstd = 288.33;
+	var toKelvin = (temperature) => { return temperature + 273.15 };
 	var pressure_factor    = (2.0 - air_pressure / 1000.0);
-	var temperature_factor = (2460 + 9 * temperature)/2595;
+	var temperature_factor = toKelvin(temperature) / Tstd;
     var adj_retard_coeff   = retard_coeff * pressure_factor * temperature_factor;
-	var sighting_retard_coeff = retard_coeff * (2.0 - sighting_pressure/1000.0) * (2460 + 9 * sighting_temperature)/2595;
+	var sighting_retard_coeff = retard_coeff * (2.0 - sighting_pressure/1000.0) * (toKelvin(sighting_temperature)/Tstd);
     var drop_at_zero       = Math.pow((41.68/sighting_velocity)/((1/zero_range) - (1/(sighting_retard_coeff-(0.75 + 0.00006*zero_range) * retard_coeff_rate * zero_range))), 2);
 	var t = ("<table id='results'  cellspacing='0'>");
    	t += ("<tr style='text-align:center;background-color:#aaaaaa;border-top:1px solid black;'><th>Range</th><th style='border-left:1px solid black;'>Velocity</th><th style='border-left:1px solid black;'>Energy</th><th  style='border-left:1px solid black;' colspan='2'>Drop</th><th style='border-left:1px solid black;' colspan='2'>Path</th><th style='border-left:1px solid black;'>Wind</th><th style='border-left:1px solid black;'>Time</th></tr>");
