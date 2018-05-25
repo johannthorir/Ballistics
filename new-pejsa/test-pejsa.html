@@ -11,27 +11,31 @@
 		font-family : sans-serif;
 	}
 	#solution {
-		border-collapse: collapse;
-		border-color : rgba(0,0,0,0.33);
-		box-shadow:  0px 2px 3px rgba(0,0,0,0.33);
-		border-bottom : 1px solid rgba(0,0,0,0.33);
-		
+		border-spacing: 0px;
+		border-collapse: separate;
+		border-radius : 4px;
+		box-shadow:  0px 3px 2px 1px rgba(0,0,0,0.35);
 	}
 	#solution th {
 		padding: 8px 12px;
-	}
-	#solution thead {
 		
+	}
+
+	#solution tr:first-child th:first-child { border-top-left-radius : 3px; }
+	#solution tr:first-child th:last-child  { border-top-right-radius : 3px; }
+	#solution tr:last-child td:first-child { border-bottom-left-radius : 3px; }
+	#solution tr:last-child td:last-child { border-bottom-right-radius : 3px; }
+
+	#solution thead {	
 		background : #457;
 		color : white;
-		box-shadow:  0px 2px 3px rgba(0,0,0,0.25);
 	}
 	#solution td {
-		font-size: 12px;
+		font-size: 14px;
 		text-align:right;
-		padding : 4px 16px;
-		border-top : 1px solid rgba(0,0,0,0.15);
+		padding : 4px 16px;		
 		background : rgba(0,0,0,0.05);
+		border-top : 1px solid rgba(0,0,0,0.25);
 	}
 	#solution tr:nth-child(4n+3) td {
 		background : white;
@@ -61,41 +65,62 @@
 		<tbody id="solution-content">
 		</tbody>
 	</table>	
+
+	<div id="more"></div>
 </div>
 
 <script defer>
-	var bc          = 0.419;  // G1
-	var formFactor  = 0.5;    // boat tail
-	var temperature = 25;     // degrees C
-	var station_pressure = 1025.25; // hPa
-	var altitude    = 0;      // m.
-	var pressure    = station_pressure * Pejsa.pressureCorrection(altitude); // hPa - THIS IS ABSOLUTE LOCAL PRESSURE AS MEASURED ON THE SPOT.
-	var sightHeight = 0.044;     // m
-	var humidity    = 0.70;    // 50% relative
-	var v0 = 3200 * 0.3048; // 923.544; // m/s
+	document.addEventListener( "DOMContentLoaded", function(){
+        document.removeEventListener( "DOMContentLoaded", arguments.callee, false );
+		var dc = (tag) => { return document.createElement(tag) };
+		var de = (id) => { return document.getElementById(id) };
+		var it = (el, txt) => { el.innerText = txt; return el; }
 
-	// zero environment matches the current ... 
-	var env = new Pejsa.EnvironmentalFactors(temperature, pressure, humidity, 1.0, Math.PI	/2 )
-	var solution = new Pejsa.Solution(bc, formFactor, 0.0065, 0.044);
-	var zeroRange   = 250.0; //
+		var bc          = 0.379;  // G1
+		var formFactor  = 0.5;    // 
+		var temperature = -1;     // degrees C
+		var station_pressure = 1017.0; // hPa
+		var altitude    = 0;      // m.
+		var pressure    = station_pressure * Pejsa.pressureCorrection(altitude); // hPa - THIS IS ABSOLUTE LOCAL PRESSURE AS MEASURED ON THE SPOT.
+		var sightHeight = 0.044;     // m
+		var humidity    = 0.75;    // relative
+		var v0 = 932.6; // 923.544; // m/s
 
-	solution.setZeroing(v0, zeroRange, 0.0, env);
-	// maybe change v0 due to temperature change from zeroing environment.
-	solution.setInitials(v0, env);
-	var destination = document.getElementById('solution-content');
-	destination.innerHTML = '';
-	for(var r=0; r<=500; r += 25) {
-		var s = solution.solveForRange(r);
-		var row = document.createElement('tr');
-		var col;
-		col = document.createElement('td'); col.innerText = s.x.toFixed(0);          row.appendChild(col); 
-		col = document.createElement('td'); col.innerText = s.v.toFixed(1);          row.appendChild(col); 
-		col = document.createElement('td'); col.innerText = (s.y * 1000).toFixed(0); row.appendChild(col);
-		col = document.createElement('td'); col.innerText = (s.w * 1000).toFixed(0); row.appendChild(col);
-		col = document.createElement('td'); col.innerText = (s.t * 1000).toFixed(0); row.appendChild(col);
-		col = document.createElement('td'); col.innerText = s.e.toFixed(0);          row.appendChild(col);
-		document.getElementById('solution-content').appendChild(row);
-	}
+		// zero environment matches the current ... 
+		var env = new Pejsa.EnvironmentalFactors(temperature, pressure, humidity, 1.0, Math.PI	/2 )
+		var solution = new Pejsa.Solution(bc, formFactor, 0.00616, 0.044);
+		var zeroRange   = 250.0; //
+
+		solution.setZeroing(v0, zeroRange, 0.0, env);
+		// maybe change v0 due to temperature change from zeroing environment.
+		solution.setInitials(v0, env);
+
+		var destination = de('solution-content');
+		
+		destination.innerHTML = '';
+		for(var r=0; r<=500; r += 25) {
+			var s = solution.solveForRange(r);
+			var row = dc('tr');
+			var col;
+			row.appendChild(it(dc('td'), s.x.toFixed(0)));
+			row.appendChild(it(dc('td'), s.v.toFixed(1)));
+			row.appendChild(it(dc('td'), (s.y * 1000).toFixed(0)));
+			row.appendChild(it(dc('td'), (s.w * 1000).toFixed(0)));
+			row.appendChild(it(dc('td'), (s.t * 1000).toFixed(0)));
+			row.appendChild(it(dc('td'), s.e.toFixed(0)));
+			destination.appendChild(row);
+		}
+		
+		var incline = -10; // degrees
+		var horizontalRange = Math.cos(incline/180*Math.PI)*zeroRange;
+		var s = solution.solveForRange(horizontalRange);
+
+		var more = de('more');
+		more.appendChild(it(dc('p'), `Incline correction for ${zeroRange} m angle ${incline}° is ${(1000*Pejsa.getInclineCorrection(v0,zeroRange,incline/180*Math.PI)).toFixed(0)} mm`));		
+		more.appendChild(it(dc('p'), `Actual solution for shorter distance ${horizontalRange.toFixed(1)} m is ${(1000*s.y).toFixed(0)} mm`));
+		
+
+	}, false );
 
 </script>
 </body>
