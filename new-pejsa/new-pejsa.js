@@ -322,18 +322,32 @@ var Pejsa = {
      *   @param {Number} shootingAngle is the shooting angle in radians.
      */
     getInclineCorrection: function(v0, range, shootingAngle) {
-        const GRAVITY = 9.80665; // m/s^2  well, where you live, not here, it's more like 9.82
         var b = Math.asin(range * GRAVITY / Math.pow(v0, 2)) / 2;
         var d = Math.sqrt(1 - 4 * Math.tan(b) * Math.sin(shootingAngle));
         return 4 * Math.pow(v0, 2) * Math.pow(Math.sin(b), 2) / (GRAVITY * (1 + d)) * (1 - 2 * Math.cos(shootingAngle) / (1 + d)) 
     },
 
+    /**
+     * The kinetic energy of the bullet in flight.
+     *   @param {Number} bulletWeight in kilograms.
+     *   @param {Number} velocity in m/s
+     * @returns the energy in Joules
+     */
+    getEnergy: (bulletWeight, velocity) => { 
+        return bulletWeight * Math.pow(velocity, 2);
+    }, 
+    
+
     // these have not been checked...
 
-    getElevation: (flightPath, range) => { return range == 0 ? 0 : -flightPath / range / 1.047 * 100 },
-    getEnergy: (bulletWeight, velocity) => { return bulletWeight * Math.pow(velocity, 2) / 450380 }, 
+    getElevation: (flightPath, range) => { 
+        return range == 0 ? 0 : -flightPath / range / 1.047 * 100 
+    },
+
     
-    getInclineMOA: (shootingAngle, range) => { return range == 0 ? 0 : -shootingAngle / range / 1.047 * 100 },
+    getInclineMOA: (shootingAngle, range) => {
+        return range == 0 ? 0 : -shootingAngle / range / 1.047 * 100 
+    },
 
     getMaxPBR    : function(v0, F0, sightHeight, vitalZone) {
         var e = Math.sqrt(1 + sightHeight / vitalZone) / Math.sqrt(2);
