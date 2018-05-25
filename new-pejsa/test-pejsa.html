@@ -4,6 +4,9 @@
 <script src="new-pejsa.js"></script>
 
 <style>
+	html {
+		background : #f0f0f0;
+	}
 	body {
 		font-family : sans-serif;
 	}
@@ -30,10 +33,10 @@
 		border-top : 1px solid rgba(0,0,0,0.15);
 		background : rgba(0,0,0,0.05);
 	}
-	#solution tr:nth-child(4n+2) td {
+	#solution tr:nth-child(4n+3) td {
 		background : white;
 	}
-	#solution tr:nth-child(4n+0) td {
+	#solution tr:nth-child(4n+1) td {
 		background : rgba(68,85,119,0.33	);
 		font-weight : bold;
 	}
@@ -69,7 +72,7 @@
 	var pressure    = station_pressure * Pejsa.pressureCorrection(altitude); // hPa - THIS IS ABSOLUTE LOCAL PRESSURE AS MEASURED ON THE SPOT.
 	var sightHeight = 0.044;     // m
 	var humidity    = 0.70;    // 50% relative
-	var v0 = 2923 * 0.3048; // 923.544; // m/s
+	var v0 = 3200 * 0.3048; // 923.544; // m/s
 
 	// zero environment matches the current ... 
 	var env = new Pejsa.EnvironmentalFactors(temperature, pressure, humidity, 1.0, Math.PI	/2 )
@@ -81,7 +84,7 @@
 	solution.setInitials(v0, env);
 	var destination = document.getElementById('solution-content');
 	destination.innerHTML = '';
-	for(var r=25; r<=500; r += 25) {
+	for(var r=0; r<=500; r += 25) {
 		var s = solution.solveForRange(r);
 		var row = document.createElement('tr');
 		var col;
@@ -94,9 +97,6 @@
 		document.getElementById('solution-content').appendChild(row);
 	}
 
-	var averageSpeed = 500 /  solution.solveForRange(500).t;
-
-	console.log(Pejsa.convertG1toG7(bc, v0/env.mach1));
 </script>
 </body>
 </html>
